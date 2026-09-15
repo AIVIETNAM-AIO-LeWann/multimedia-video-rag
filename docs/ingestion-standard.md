@@ -33,3 +33,16 @@ Notebook trong `notebooks/ingestion` không chứa output. Notebook download sau
 khi chạy được đặt trong `notebooks/runs`; tên gợi ý:
 `YYYYMMDD-platform-job-scope.ipynb`. Log quan trọng nên được tóm tắt trong issue
 hoặc run note thay vì đưa toàn bộ output vào Git.
+
+
+## Sử dụng GPU
+
+Mỗi notebook tự lấy toàn bộ GPU CUDA khả dụng bằng `torch.cuda.device_count()`.
+Colab T4 tạo một worker; Kaggle hai T4 tạo hai worker và hai model replica. Mỗi
+worker giữ độc quyền một GPU trong suốt một video/archive. Batch được đặt theo
+VRAM và tự giảm khi CUDA OOM. Upload được gom theo nhóm và điều phối ngoài worker
+GPU để tránh xung đột commit.
+
+GPU có thể tạm giảm utilization trong lúc tải archive, giải mã video, đọc TAR,
+ghi Parquet hoặc upload mạng; không có notebook nào bảo đảm 100% GPU liên tục.
+Mục tiêu là không để GPU thứ hai bị bỏ trống khi còn công việc inference độc lập.

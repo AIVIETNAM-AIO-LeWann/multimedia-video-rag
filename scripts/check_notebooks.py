@@ -46,6 +46,9 @@ def main() -> None:
         for runtime in ("colab", "kaggle"):
             if runtime not in source.lower():
                 errors.append(f"{name}: missing {runtime} runtime support/documentation")
+        for capability in ("GPU_IDS", "torch.cuda.device_count()", "ThreadPoolExecutor"):
+            if capability not in source:
+                errors.append(f"{name}: missing adaptive GPU capability {capability!r}")
         if TOKEN_PATTERN.search(source):
             errors.append(f"{name}: appears to contain a literal Hugging Face token")
         for index, cell in enumerate(notebook.get("cells", [])):
