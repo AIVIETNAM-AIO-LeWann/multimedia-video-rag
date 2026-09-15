@@ -243,7 +243,7 @@ Mỗi query cần ground truth ở cấp video và khoảng thời gian/frame. T
 
 ## 7. Thứ tự triển khai được khuyến nghị
 
-1. Hoàn tất và audit artifact BEiT-3; chọn và ingest OCR/caption theo contract chung.
+1. Audit đầy đủ artifact SigLIP và BEiT-3 đã ingest; chọn và ingest OCR/caption theo contract chung.
 2. Chuẩn hóa canonical IDs và timestamp join giữa keyframe, ASR, OCR, OD, caption.
 3. Xây evaluation harness trước backend hoàn chỉnh.
 4. Tạo hai visual index và đo A/B/C.

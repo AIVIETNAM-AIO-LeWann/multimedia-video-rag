@@ -59,7 +59,7 @@ không gian khác nhau, vì vậy không được ghép vector hoặc so cosine 
 | ASR | Video BTC | `khanhld/chunkformer-rnnt-large-vie`, fallback `Systran/faster-whisper-large-v3` | `aqpahm/aic2026-asr-chunkformer-rnnt-large` | Private | Hoàn tất |
 | Object detection | Keyframe | WeDetect Large, threshold `0.30`, core vocabulary 400 nhãn | `aqpahm/aic2026-od-wedetect-large` | Private | Hoàn tất |
 | Visual embedding | Keyframe | `google/siglip2-so400m-patch16-384` | `aqpahm/aic2026-visual-siglip2-so400m` | Private | Hoàn tất |
-| Visual embedding | Keyframe | BEiT-3 Large Patch16 384, COCO Retrieval | `aqpahm/aic2026-visual-beit3-large-coco-retrieval` | Private | Đang ingest |
+| Visual embedding | Keyframe | BEiT-3 Large Patch16 384, COCO Retrieval | `aqpahm/aic2026-visual-beit3-large-coco-retrieval` | Private | Đã ingest hoàn tất |
 
 Trạng thái trên phản ánh tiến độ vận hành hiện tại, không phải kết quả benchmark
 hay quyết định chọn model cho hệ thống retrieval cuối cùng. Xem bản theo dõi chi
