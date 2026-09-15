@@ -13,6 +13,7 @@ không bao gồm thiết kế hay triển khai hệ thống retrieval hoàn ch�
 | ASR | `aqpahm/aic2026-asr-chunkformer-rnnt-large` | Private | Đã ingest; có Whisper fallback cho ca rỗng |
 | OD | `aqpahm/aic2026-od-wedetect-large` | Private | Đã ingest |
 | SigLIP | `aqpahm/aic2026-visual-siglip2-so400m` | Private | Đang ingest |
+| BEiT-3 Large COCO Retrieval | `aqpahm/aic2026-visual-beit3-large-coco-retrieval` | Private | Sẵn sàng ingest |
 
 Việc hoàn tất luôn được đối chiếu với video thực sự có trong archive của BTC;
 ID bị khuyết trong dãy số không được xem là dữ liệu thiếu.

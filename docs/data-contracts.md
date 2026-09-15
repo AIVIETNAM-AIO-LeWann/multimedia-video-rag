@@ -39,7 +39,7 @@ Detection gồm identity, label đa ngôn ngữ, confidence, bounding box chuẩ
 `box_area_ratio`. Marker lưu model/checkpoint, vocabulary hash, threshold và
 source revision.
 
-## SigLIP visual embedding
+## Visual embedding
 
 Đường dẫn `data/{level}/{video_id}/` chứa:
 
@@ -50,6 +50,9 @@ source revision.
 Các cột identity bắt buộc: `video_id`, `frame_uid`, `sample_n`,
 `frame_idx`, `shot_id`, `timestamp_sec`, `image_path`, `embedding_row`.
 Artifact này chưa quy định loại index hoặc cách dùng vector khi retrieval.
+Mỗi model visual ghi vào một dataset riêng. SigLIP 2 dùng vector 1152 chiều;
+BEiT-3 Large COCO Retrieval dùng vector 1024 chiều. Hai không gian vector không
+được trộn hoặc so cosine trực tiếp với nhau.
 
 ## Thay đổi schema
 

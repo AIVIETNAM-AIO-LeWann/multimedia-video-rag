@@ -12,6 +12,7 @@ Google Colab/Kaggle và ghi artifact trở lại Hugging Face.
 | ASR ingestion | ChunkFormer RNNT Large Vietnamese + Whisper fallback | `aqpahm/aic2026-asr-chunkformer-rnnt-large` | Đã chạy |
 | Object detection | WeDetect Large, threshold 0.30 | `aqpahm/aic2026-od-wedetect-large` | Đã chạy |
 | Visual embedding | SigLIP 2 So400m Patch16 384 | `aqpahm/aic2026-visual-siglip2-so400m` | Đang chạy |
+| Visual embedding | BEiT-3 Large Patch16 384, COCO Retrieval | `aqpahm/aic2026-visual-beit3-large-coco-retrieval` | Sẵn sàng chạy |
 
 Chưa có quyết định chính thức về kiến trúc retrieval, vector database, fusion,
 reranking, API, giao diện, cách triển khai hay model cho các module tiếp theo.

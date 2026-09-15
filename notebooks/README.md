@@ -6,6 +6,7 @@
 - `ingest-asr-chunkformer-rnnt-large.ipynb`
 - `ingest-od-wedetect-large.ipynb`
 - `ingest-visual-siglip2-so400m.ipynb`
+- `ingest-visual-beit3-large-coco-retrieval.ipynb`
 
 Các file này là bản nguồn sạch để upload lên Colab/Kaggle. Chúng không phải bằng
 chứng rằng kiến trúc retrieval hoặc model ensemble đã được quyết định.

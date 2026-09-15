@@ -19,6 +19,10 @@ EXPECTED = {
         "aqpahm/aic2026-visual-siglip2-so400m",
         "google/siglip2-so400m-patch16-384",
     ),
+    "ingest-visual-beit3-large-coco-retrieval.ipynb": (
+        "aqpahm/aic2026-visual-beit3-large-coco-retrieval",
+        "beit3_large_patch16_384_coco_retrieval.pth",
+    ),
 }
 TOKEN_PATTERN = re.compile(r"hf_[A-Za-z0-9]{20,}")
 
