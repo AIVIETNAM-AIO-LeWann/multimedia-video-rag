@@ -13,7 +13,7 @@ chứng rằng kiến trúc retrieval hoặc model ensemble đã được quyế
 
 ## Notebook đã chạy
 
-Đặt bản download có output vào `runs/`. Git bỏ qua các file `.ipynb` ở đó để
-tránh lưu log lớn hoặc dữ liệu nhạy cảm. Có thể chạy
+Giữ bản download có output ngoài repository. Khi cần đưa thay đổi logic từ bản
+cloud trở lại `ingestion/`, chạy
 `python scripts/strip_notebook_outputs.py <file>` trên một bản sao trước khi
-đưa thay đổi logic trở lại `ingestion/`.
+commit.

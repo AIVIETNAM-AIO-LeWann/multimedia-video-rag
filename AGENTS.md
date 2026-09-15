@@ -10,7 +10,7 @@ backend, vector database, fusion strategy hay serving architecture là quyết �
 
 - Notebook nguồn nằm trong `notebooks/ingestion`, phải tự chạy độc lập trên
   Colab hoặc Kaggle và không chứa output, execution count hay secret.
-- Notebook đã chạy nằm trong `notebooks/runs` và không commit.
+- Notebook đã chạy trên Colab/Kaggle không được đưa vào repository.
 - Mọi job ghi rõ input/output repo, model ID, revision, tham số quan trọng và
   schema version trong marker.
 - Chỉ ghi marker thành công sau khi mọi artifact của video đã upload xong.

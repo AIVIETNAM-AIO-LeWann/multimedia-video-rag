@@ -30,9 +30,9 @@ Thư mục tạm:
 ## Notebook nguồn và notebook đã chạy
 
 Notebook trong `notebooks/ingestion` không chứa output. Notebook download sau
-khi chạy được đặt trong `notebooks/runs`; tên gợi ý:
-`YYYYMMDD-platform-job-scope.ipynb`. Log quan trọng nên được tóm tắt trong issue
-hoặc run note thay vì đưa toàn bộ output vào Git.
+khi chạy được lưu ngoài repository. Nếu chuyển thay đổi logic từ bản cloud về
+codebase, tạo một bản sao, xóa output và execution count rồi mới thay notebook
+nguồn. Không đưa log hoặc artifact của phiên chạy vào Git.
 
 
 ## Sử dụng GPU

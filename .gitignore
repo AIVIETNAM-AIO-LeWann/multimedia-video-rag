@@ -19,8 +19,6 @@ models/
 logs/
 
 .ipynb_checkpoints/
-notebooks/runs/*.ipynb
-!notebooks/runs/README.md
 .idea/
 .vscode/
 .DS_Store

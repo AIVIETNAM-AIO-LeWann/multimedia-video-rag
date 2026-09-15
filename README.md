@@ -21,9 +21,9 @@ Những nội dung đó sẽ được đánh giá riêng sau khi artifact ingest
 ## Cấu trúc
 
 `notebooks/ingestion/` chứa notebook chuẩn, sạch output và có thể upload trực
-tiếp lên Colab hoặc Kaggle. `notebooks/runs/` dành cho notebook đã chạy được
-download từ nền tảng; thư mục này bị Git bỏ qua. `src/multimedia_video_rag/ingestion/`
-chứa contract và công cụ kiểm tra artifact, không chứa logic retrieval.
+tiếp lên Colab hoặc Kaggle. Notebook đã chạy và log từ nền tảng cloud không được
+đưa vào repository. `src/multimedia_video_rag/ingestion/` chứa contract và công
+cụ kiểm tra artifact, không chứa logic retrieval.
 
 ## Quy trình chạy notebook
 
@@ -31,8 +31,8 @@ chứa contract và công cụ kiểm tra artifact, không chứa logic retrieva
 2. Bật GPU và Internet, thêm secret `HF_TOKEN` có quyền phù hợp.
 3. Chạy pilot với giới hạn nhỏ nếu notebook hỗ trợ, kiểm tra artifact trên HF.
 4. Bỏ giới hạn và chạy tiếp. Notebook tự bỏ qua video có marker hợp lệ.
-5. Download notebook đã chạy vào `notebooks/runs/` nếu cần lưu log.
-6. Chỉ cập nhật bản nguồn sạch trong `notebooks/ingestion/`.
+5. Nếu cần lưu notebook đã chạy, giữ nó ngoài repository.
+6. Chỉ đưa bản nguồn đã xóa output vào `notebooks/ingestion/`.
 
 ## Kiểm tra cục bộ
 
