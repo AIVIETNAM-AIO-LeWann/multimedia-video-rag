@@ -108,7 +108,6 @@ multimedia-video-rag/
 │   └── ingestion/                # Notebook nguồn sạch cho Colab/Kaggle
 ├── src/multimedia_video_rag/
 │   └── ingestion/                # Contract và công cụ kiểm tra artifact
-├── schemas/                      # JSON Schema cho success marker
 ├── scripts/                      # Kiểm tra và làm sạch notebook
 ├── tests/                        # Kiểm thử contract/validator
 ├── docs/
