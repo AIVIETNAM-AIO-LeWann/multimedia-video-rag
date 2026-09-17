@@ -18,6 +18,7 @@ nhân và được giữ ngoài repository.
 | [`ingest-od-wedetect-large.ipynb`](ingestion/ingest-od-wedetect-large.ipynb) | Dataset keyframe | WeDetect Large, vocabulary AIC 400 nhãn | `aqpahm/aic2026-od-wedetect-large` | `detections.parquet`, `frames.parquet`, `_OD_SUCCESS.json` |
 | [`ingest-visual-siglip2-so400m.ipynb`](ingestion/ingest-visual-siglip2-so400m.ipynb) | Dataset keyframe | SigLIP 2 So400m Patch16 384 | `aqpahm/aic2026-visual-siglip2-so400m` | `embeddings.safetensors`, `frames.parquet`, `_VISUAL_SUCCESS.json` |
 | [`ingest-visual-beit3-large-coco-retrieval.ipynb`](ingestion/ingest-visual-beit3-large-coco-retrieval.ipynb) | Dataset keyframe | BEiT-3 Large Patch16 384, COCO Retrieval | `aqpahm/aic2026-visual-beit3-large-coco-retrieval` | `embeddings.safetensors`, `frames.parquet`, `_VISUAL_SUCCESS.json` |
+| [`ingest-caption-blip2-opt-2.7b-coco.ipynb`](ingestion/ingest-caption-blip2-opt-2.7b-coco.ipynb) | Dataset keyframe | BLIP-2 OPT 2.7B fine-tuned on COCO | `aqpahm/aic2026-caption-blip2-opt-2.7b-coco` (dự kiến) | `captions.parquet`, `_CAPTION_SUCCESS.json` |
 
 ## Thứ tự phụ thuộc
 
@@ -29,17 +30,19 @@ flowchart TD
     O[2a. Object detection]
     S[2b. SigLIP 2 embedding]
     B[2c. BEiT-3 embedding]
+    C[2d. BLIP-2 captioning pilot]
 
     V --> K
     V --> A
     K --> O
     K --> S
     K --> B
+    K --> C
 ```
 
 - Keyframe phải hoàn tất trước OD, SigLIP 2 và BEiT-3.
 - ASR đọc video gốc nên có thể chạy độc lập hoặc song song với keyframe.
-- OD, SigLIP 2 và BEiT-3 không phụ thuộc lẫn nhau.
+- OD, SigLIP 2, BEiT-3 và BLIP-2 captioning không phụ thuộc lẫn nhau.
 - Hai visual model phải ghi vào hai dataset riêng vì số chiều và không gian
   embedding khác nhau.
 
@@ -163,6 +166,17 @@ bình thường.
 - Batch khởi tạo: 16; tự giảm khi CUDA OOM.
 - Vector đầu ra: 1024 chiều, FP16 và đã L2-normalize.
 - Có smoke test trên từng GPU trước khi bắt đầu toàn bộ workload.
+
+### Image captioning — BLIP-2 OPT 2.7B COCO
+
+- Model: `Salesforce/blip2-opt-2.7b-coco`; caption tiếng Anh cho từng keyframe.
+- Chế độ mặc định là pilot 5 video; cần xem nội dung caption rồi mới đặt
+  `MAX_VIDEOS_PER_RUN = None` để chạy toàn bộ.
+- Một model FP16 trên mỗi GPU T4; batch khởi tạo 2 và tự giảm khi OOM.
+- Caption có thể bỏ sót chữ nhỏ, tên riêng và thông tin chuyển động;
+  không thay thế OCR hoặc ASR.
+- Artifact/marker: `captions.parquet`, `_CAPTION_SUCCESS.json`.
+- Dataset output ở trên là cấu hình dự kiến, chưa xác nhận đã ingest.
 
 ## Điều kiện hoàn tất
 

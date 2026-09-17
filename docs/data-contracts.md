@@ -54,6 +54,18 @@ Mỗi model visual ghi vào một dataset riêng. SigLIP 2 dùng vector 1152 chi
 BEiT-3 Large COCO Retrieval dùng vector 1024 chiều. Hai không gian vector không
 được trộn hoặc so cosine trực tiếp với nhau.
 
+## Image captioning
+
+Notebook BLIP-2 ghi `data/{level}/{video_id}/captions.parquet` và
+`_CAPTION_SUCCESS.json` vào dataset riêng. Mỗi keyframe có đúng một
+caption tiếng Anh; Parquet giữ `video_id`, `frame_uid`, `sample_n`,
+`frame_idx`, `shot_id`, `timestamp_sec`, `image_path`, `caption_en`,
+`caption_en_normalized`, `language`, `model_id` và `model_revision`.
+Caption rỗng là lỗi, không được ghi marker thành công. Marker lưu
+source/model revision, số frame/caption, generation settings, hash
+Parquet và schema version. Caption không phải kết quả OCR và hiện
+chưa được ingest hoặc đánh giá trên toàn bộ dữ liệu.
+
 ## Thay đổi schema
 
 Ưu tiên thêm cột theo hướng tương thích. Tăng `schema_version` khi đổi tên,

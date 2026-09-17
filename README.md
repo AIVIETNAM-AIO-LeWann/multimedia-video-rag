@@ -18,6 +18,7 @@ Dự án đang thực hiện:
 - nhận dạng tiếng nói theo timeline video;
 - phát hiện đối tượng trên keyframe;
 - tạo visual embedding riêng cho từng model;
+- chuẩn bị notebook pilot image captioning bằng BLIP-2;
 - kiểm tra schema, provenance và tính đầy đủ của artifact;
 - hỗ trợ chạy lại an toàn sau khi phiên Colab/Kaggle bị ngắt.
 
@@ -25,7 +26,7 @@ Các nội dung chưa thuộc phạm vi đã triển khai:
 
 - xây dựng chỉ mục tìm kiếm hoặc vector database;
 - thiết kế query pipeline, fusion và reranking;
-- ingest OCR hoặc caption;
+- ingest OCR và chạy caption trên toàn bộ dữ liệu;
 - backend, frontend, API và deployment;
 - benchmark để chọn kiến trúc retrieval cuối cùng.
 
@@ -39,16 +40,19 @@ flowchart LR
     OD[Object detection<br/>WeDetect Large]
     S[Visual embedding<br/>SigLIP 2 So400m]
     B[Visual embedding<br/>BEiT-3 Large]
+    C[Image captioning pilot<br/>BLIP-2 OPT 2.7B]
 
     V --> KF
     V --> ASR
     KF --> OD
     KF --> S
     KF --> B
+    KF --> C
 ```
 
-ASR xử lý trực tiếp video gốc. OD và hai job visual embedding đọc cùng dataset
-keyframe nhưng ghi vào ba dataset độc lập. Vector SigLIP 2 và BEiT-3 thuộc hai
+ASR xử lý trực tiếp video gốc. OD, hai job visual embedding và notebook
+captioning đọc cùng dataset keyframe; mỗi job ghi vào một dataset riêng.
+Vector SigLIP 2 và BEiT-3 thuộc hai
 không gian khác nhau, vì vậy không được ghép vector hoặc so cosine trực tiếp.
 
 ## Trạng thái artifact
@@ -60,6 +64,7 @@ không gian khác nhau, vì vậy không được ghép vector hoặc so cosine 
 | Object detection | Keyframe | WeDetect Large, threshold `0.30`, core vocabulary 400 nhãn | `aqpahm/aic2026-od-wedetect-large` | Private | Hoàn tất |
 | Visual embedding | Keyframe | `google/siglip2-so400m-patch16-384` | `aqpahm/aic2026-visual-siglip2-so400m` | Private | Hoàn tất |
 | Visual embedding | Keyframe | BEiT-3 Large Patch16 384, COCO Retrieval | `aqpahm/aic2026-visual-beit3-large-coco-retrieval` | Private | Đã ingest hoàn tất |
+| Image captioning | Keyframe | `Salesforce/blip2-opt-2.7b-coco` | `aqpahm/aic2026-caption-blip2-opt-2.7b-coco` (dự kiến) | Private (dự kiến) | Notebook sẵn sàng pilot; chưa ingest |
 
 Trạng thái trên phản ánh tiến độ vận hành hiện tại, không phải kết quả benchmark
 hay quyết định chọn model cho hệ thống retrieval cuối cùng. Xem bản theo dõi chi
@@ -83,6 +88,7 @@ lại keyframe.
 | ASR | `asr.parquet`, `asr_chunks.parquet` | `_ASR_SUCCESS.json` |
 | Object detection | `detections.parquet`, `frames.parquet` | `_OD_SUCCESS.json` |
 | Visual embedding | `embeddings.safetensors`, `frames.parquet` | `_VISUAL_SUCCESS.json` |
+| Image captioning | `captions.parquet` | `_CAPTION_SUCCESS.json` |
 
 Marker chỉ được công bố sau khi artifact đã được tạo, kiểm tra và upload thành
 công. Notebook chỉ skip một video khi marker từ xa hợp lệ và các file bắt buộc

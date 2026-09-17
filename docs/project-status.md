@@ -18,13 +18,20 @@ không bao gồm thiết kế hay triển khai hệ thống retrieval hoàn ch�
 Việc hoàn tất luôn được đối chiếu với video thực sự có trong archive của BTC;
 ID bị khuyết trong dãy số không được xem là dữ liệu thiếu.
 
+## Notebook đang chuẩn bị
+
+Notebook `ingest-caption-blip2-opt-2.7b-coco.ipynb` đã được viết
+để pilot image captioning bằng BLIP-2 trên keyframe. Dataset output
+`aqpahm/aic2026-caption-blip2-opt-2.7b-coco` là cấu hình dự kiến;
+chưa xác nhận đã tạo hoặc ingest thành công.
+
 ## Chưa quyết định
 
 - kiến trúc hệ thống online và ranh giới dịch vụ;
 - vector database/search engine và metadata store;
 - cách kết hợp các visual embedding;
 - query rewriting, fusion, filtering và reranking;
-- model OCR, caption và các module chưa ingest;
+- model OCR, đánh giá chất lượng caption và các module chưa ingest;
 - hạ tầng host/deploy.
 
 Mọi phương án về các mục trên hiện chỉ là giả thuyết cần benchmark.
