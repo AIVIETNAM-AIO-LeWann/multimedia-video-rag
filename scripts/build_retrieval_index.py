@@ -14,7 +14,7 @@ from multimedia_video_rag.retrieval.sources import download_sources
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Download keyframe/SigLIP/BEiT-3/OD/ASR/caption artifacts (no keyframe images) "
+            "Download keyframe/SigLIP/BEiT-3/caption artifacts (no keyframe images) "
             "and build an experimental index directory."
         )
     )

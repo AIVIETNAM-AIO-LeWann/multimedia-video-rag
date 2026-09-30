@@ -9,38 +9,6 @@ VIDEO_ID_PATTERN = re.compile(r"^L\d{2}_V\d{3}$")
 KEYFRAME_COLUMNS = frozenset(
     {"video_id", "sample_n", "shot_id", "frame_idx", "timestamp_sec", "image_path"}
 )
-ASR_COLUMNS = frozenset(
-    {
-        "video_id",
-        "segment_id",
-        "start_sec",
-        "end_sec",
-        "timestamp_sec",
-        "raw_text",
-        "normalized_text",
-        "normalized_no_accent",
-        "language",
-        "model_id",
-    }
-)
-OD_COLUMNS = frozenset(
-    {
-        "video_id",
-        "frame_uid",
-        "frame_idx",
-        "timestamp_sec",
-        "class_id",
-        "label_en",
-        "label_vi",
-        "label_zh",
-        "confidence",
-        "x1_norm",
-        "y1_norm",
-        "x2_norm",
-        "y2_norm",
-        "box_area_ratio",
-    }
-)
 VISUAL_IDENTITY_COLUMNS = frozenset(
     {
         "video_id",
@@ -51,6 +19,23 @@ VISUAL_IDENTITY_COLUMNS = frozenset(
         "timestamp_sec",
         "image_path",
         "embedding_row",
+    }
+)
+
+CAPTION_COLUMNS = frozenset(
+    {
+        "video_id",
+        "frame_uid",
+        "sample_n",
+        "frame_idx",
+        "shot_id",
+        "timestamp_sec",
+        "image_path",
+        "caption_en",
+        "caption_en_normalized",
+        "language",
+        "model_id",
+        "model_revision",
     }
 )
 

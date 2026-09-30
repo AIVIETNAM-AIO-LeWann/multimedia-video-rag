@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "multimedia-video-rag"
 version = "0.1.0"
-description = "Offline ingestion artifacts for an AIC multimedia video retrieval project"
+description = "Text-to-video moment retrieval research on AIC 2026 keyframes with SigLIP 2 and BEiT-3"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = ["huggingface-hub>=0.35,<2", "pandas>=2.2,<3", "pyarrow>=17,<22"]

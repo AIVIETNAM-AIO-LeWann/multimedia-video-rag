@@ -25,7 +25,7 @@ def test_build_publishes_aligned_indexes(cache: Path, tmp_path: Path):
 
     assert manifest["frame_count"] == 5
     assert manifest["video_count"] == 2
-    assert manifest["asr_chunk_count"] == 2
+    assert manifest["caption_count"] == 5
     assert manifest["faiss"]["siglip"]["model_ids"] == ["org/siglip"]
     assert manifest["faiss"]["beit3"]["model_revisions"] == ["rev1"]
     assert not output.with_name("index.partial").exists()
@@ -49,43 +49,12 @@ def test_build_publishes_aligned_indexes(cache: Path, tmp_path: Path):
             assert ids[0, 0] == frame_row
             assert scores[0, 0] == pytest.approx(1.0, abs=1e-2)
 
-    hits = connection.execute(
-        "SELECT rowid FROM captions_fts WHERE captions_fts MATCH ? ORDER BY rank",
-        ["bus AND v004"],
+    captions = connection.execute(
+        "SELECT frame_row, caption_en FROM captions ORDER BY frame_row"
     ).fetchall()
-    assert {row[0] for row in hits} == {3, 4}
-
-    accented = connection.execute(
-        "SELECT video_id FROM asr_segments JOIN asr_fts ON asr_fts.rowid = segment_row "
-        "WHERE asr_fts MATCH ?",
-        ['"việt nam"'],
-    ).fetchall()
-    plain = connection.execute(
-        "SELECT rowid FROM asr_fts WHERE asr_fts MATCH ?", ['"viet nam"']
-    ).fetchall()
-    assert len(accented) == 2
-    assert len(plain) == 2
-    chunk_hits = connection.execute(
-        "SELECT c.chunk_id FROM asr_chunks c JOIN asr_chunks_fts f ON f.rowid = c.chunk_row "
-        "WHERE asr_chunks_fts MATCH ? ORDER BY c.chunk_row",
-        ['"thoi su"'],
-    ).fetchall()
-    assert [row[0] for row in chunk_hits] == [
-        "L21_V001__asr_chunk_00000",
-        "L22_V004__asr_chunk_00000",
-    ]
-
-    left = connection.execute(
-        "SELECT frame_row FROM od_detections WHERE label_en = 'car' "
-        "AND position_horizontal = 'left' ORDER BY frame_row"
-    ).fetchall()
-    assert left == [(0,), (3,)]
-
-    cars = connection.execute(
-        "SELECT frame_row, object_count, max_confidence FROM od_frame_labels "
-        "WHERE label_en = 'car' ORDER BY frame_row"
-    ).fetchall()
-    assert cars == [(0, 2, 0.9), (3, 2, 0.9)]
+    assert captions[3] == (3, "a red bus on street L22_V004 0")
+    tables = {row[0] for row in connection.execute("SELECT name FROM sqlite_master")}
+    assert not {"od_detections", "asr_segments", "captions_fts"} & tables
     connection.close()
 
 
@@ -128,15 +97,7 @@ def test_download_patterns_exclude_keyframe_images():
     patterns = allow_patterns("keyframe")
     assert "data/*/*/frames.parquet" in patterns
     assert not any("keyframes.tar" in pattern for pattern in patterns)
-    assert allow_patterns("asr", ["L21_V001"]) == [
-        "data/*/L21_V001/asr.parquet",
-        "data/*/L21_V001/asr_chunks.parquet",
-        "data/*/L21_V001/_ASR_SUCCESS.json",
+    assert allow_patterns("caption", ["L21_V001"]) == [
+        "data/*/L21_V001/captions.parquet",
+        "data/*/L21_V001/_CAPTION_SUCCESS.json",
     ]
-
-
-def test_speech_without_chunks_blocks_build(cache: Path, tmp_path: Path):
-    path = cache / "asr" / "data" / "L21" / "L21_V001" / "asr_chunks.parquet"
-    pd.read_parquet(path).iloc[:0].to_parquet(path)
-    with pytest.raises(SchemaError, match="segments and videos with chunks differ"):
-        build_index(cache, tmp_path / "index")
