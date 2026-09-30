@@ -2,7 +2,8 @@
 
 File format (``.npz``), written by ``notebooks/retrieval/encode-query-vectors.ipynb``:
 
-- ``query_id``, ``query_vi``, ``query_en``, ``objects``: string arrays, one per query;
+- ``query_id``, ``query_vi``, ``query_en``: string arrays, one per query (an ``objects``
+  array written by older notebook runs is ignored);
 - ``siglip`` (N x 1152) and ``beit3`` (N x 1024) float32, L2-normalized; a row of NaN
   means the query had no text for that encoder (BEiT-3 needs ``query_en``);
 - ``meta``: JSON with ``format_version``, the text language used for SigLIP 2, and per
@@ -18,11 +19,15 @@ from typing import Any
 
 import numpy as np
 
-from multimedia_video_rag.retrieval.pipeline import Query
-from multimedia_video_rag.retrieval.search import parse_objects
-
 FORMAT_VERSION = 1
 VISUAL_MODULES = ("siglip", "beit3")
+
+
+@dataclass(frozen=True)
+class Query:
+    query_id: str
+    text_vi: str
+    text_en: str = ""
 
 
 @dataclass
@@ -48,14 +53,9 @@ def load_query_vectors(path: Path, manifest: dict[str, Any]) -> QueryVectors:
         if len(set(ids)) != len(ids):
             raise ValueError(f"{path}: duplicate query_id")
         queries = [
-            Query(
-                query_id=query_id,
-                text_vi=str(text_vi),
-                text_en=str(text_en),
-                objects=tuple(parse_objects(str(objects))),
-            )
-            for query_id, text_vi, text_en, objects in zip(
-                ids, data["query_vi"], data["query_en"], data["objects"], strict=True
+            Query(query_id=query_id, text_vi=str(text_vi), text_en=str(text_en))
+            for query_id, text_vi, text_en in zip(
+                ids, data["query_vi"], data["query_en"], strict=True
             )
         ]
         vectors: dict[str, np.ndarray] = {}

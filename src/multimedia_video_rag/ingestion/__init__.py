@@ -1,18 +1,16 @@
-"""Artifact schemas and validation helpers for ingestion jobs."""
+"""Artifact schemas and validation helpers for the ingested keyframe/embedding data."""
 
 from multimedia_video_rag.ingestion.schemas import (
-    ASR_COLUMNS,
+    CAPTION_COLUMNS,
     KEYFRAME_COLUMNS,
-    OD_COLUMNS,
     VISUAL_IDENTITY_COLUMNS,
     SchemaError,
     make_frame_uid,
 )
 
 __all__ = [
-    "ASR_COLUMNS",
+    "CAPTION_COLUMNS",
     "KEYFRAME_COLUMNS",
-    "OD_COLUMNS",
     "VISUAL_IDENTITY_COLUMNS",
     "SchemaError",
     "make_frame_uid",

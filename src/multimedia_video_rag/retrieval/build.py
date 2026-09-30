@@ -19,36 +19,24 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from multimedia_video_rag.ingestion.audit import (
-    ASR_CHUNK_COLUMNS,
-    CAPTION_COLUMNS,
-    OD_FRAME_COLUMNS,
-)
 from multimedia_video_rag.ingestion.schemas import (
-    ASR_COLUMNS,
+    CAPTION_COLUMNS,
     KEYFRAME_COLUMNS,
-    OD_COLUMNS,
     VISUAL_IDENTITY_COLUMNS,
     SchemaError,
     make_frame_uid,
     read_validated_parquet,
 )
 
-INDEX_SCHEMA_VERSION = 1
+INDEX_SCHEMA_VERSION = 2
 VISUAL_MODULES = {"siglip": 1152, "beit3": 1024}
 MARKERS = {
     "keyframe": "_SUCCESS.json",
     "siglip": "_VISUAL_SUCCESS.json",
     "beit3": "_VISUAL_SUCCESS.json",
-    "od": "_OD_SUCCESS.json",
-    "asr": "_ASR_SUCCESS.json",
     "caption": "_CAPTION_SUCCESS.json",
 }
 NORM_TOLERANCE = 1e-2
-# Present in the WeDetect artifacts; kept for spatial queries ("xe bên trái").
-OD_POSITION_COLUMNS = frozenset(
-    {"center_x_norm", "center_y_norm", "position_horizontal", "position_vertical"}
-)
 
 
 @dataclass(frozen=True)
@@ -221,135 +209,6 @@ def load_captions(root: Path, frames: pd.DataFrame, videos: list[VideoRef]) -> p
     return pd.concat(parts, ignore_index=True).sort_values("frame_row", ignore_index=True)
 
 
-def load_od(
-    root: Path, frames: pd.DataFrame, videos: list[VideoRef]
-) -> tuple[pd.DataFrame, pd.DataFrame]:
-    require_markers("od", root, videos)
-    by_video = dict(tuple(frames.groupby("video_id", sort=False)))
-    frame_parts, detection_parts = [], []
-    for video in videos:
-        directory = video.directory(root)
-        video_frames = by_video[video.video_id]
-        od_frames = read_validated_parquet(directory / "frames.parquet", OD_FRAME_COLUMNS)
-        _check_single_video(od_frames, video, "od")
-        rows = _frame_rows(video_frames, od_frames["frame_uid"], f"od {video.video_id}")
-        detections = read_validated_parquet(
-            directory / "detections.parquet", OD_COLUMNS | OD_POSITION_COLUMNS
-        )
-        _check_single_video(detections, video, "od detections")
-        lookup = dict(zip(video_frames["frame_uid"], video_frames["frame_row"], strict=True))
-        unknown = set(detections["frame_uid"].astype(str)) - set(lookup)
-        if unknown:
-            raise SchemaError(
-                f"od {video.video_id}: detections on unknown frames {sorted(unknown)[:5]}"
-            )
-        detection_rows = detections["frame_uid"].astype(str).map(lookup).astype("int64")
-        counts = detection_rows.value_counts()
-        declared = pd.Series(od_frames["detection_count"].astype("int64").to_numpy(), index=rows)
-        if not declared.eq(counts.reindex(declared.index, fill_value=0)).all():
-            raise SchemaError(f"od {video.video_id}: detection_count does not match detections")
-        frame_parts.append(
-            pd.DataFrame(
-                {
-                    "frame_row": rows,
-                    "detection_count": declared.to_numpy(),
-                    "status": od_frames["status"].astype(str).to_numpy(),
-                }
-            )
-        )
-        detection_parts.append(
-            pd.DataFrame(
-                {
-                    "frame_row": detection_rows.to_numpy(),
-                    "class_id": detections["class_id"].astype("int64").to_numpy(),
-                    "label_en": detections["label_en"].astype(str).to_numpy(),
-                    "label_vi": detections["label_vi"].astype(str).to_numpy(),
-                    "confidence": detections["confidence"].astype("float64").to_numpy(),
-                    "x1": detections["x1_norm"].astype("float64").to_numpy(),
-                    "y1": detections["y1_norm"].astype("float64").to_numpy(),
-                    "x2": detections["x2_norm"].astype("float64").to_numpy(),
-                    "y2": detections["y2_norm"].astype("float64").to_numpy(),
-                    "box_area_ratio": detections["box_area_ratio"].astype("float64").to_numpy(),
-                    "center_x": detections["center_x_norm"].astype("float64").to_numpy(),
-                    "center_y": detections["center_y_norm"].astype("float64").to_numpy(),
-                    "position_horizontal": (
-                        detections["position_horizontal"].astype(str).to_numpy()
-                    ),
-                    "position_vertical": detections["position_vertical"].astype(str).to_numpy(),
-                }
-            )
-        )
-    od_frames = pd.concat(frame_parts, ignore_index=True)
-    detections = pd.concat(detection_parts, ignore_index=True)
-    return od_frames.sort_values("frame_row", ignore_index=True), detections
-
-
-ASR_TEXT_COLUMNS = ["raw_text", "normalized_text", "normalized_no_accent", "model_id"]
-
-
-def _load_asr_table(
-    root: Path,
-    videos: list[VideoRef],
-    *,
-    filename: str,
-    required: frozenset[str],
-    id_column: str,
-    row_column: str,
-) -> pd.DataFrame:
-    parts = []
-    for video in videos:
-        table = read_validated_parquet(video.directory(root) / filename, required)
-        _check_single_video(table, video, f"asr {filename}")
-        if table.empty:
-            continue  # The marker records a video without detected speech.
-        start = table["start_sec"].astype("float64")
-        end = table["end_sec"].astype("float64")
-        if not (np.isfinite(start).all() and np.isfinite(end).all() and (end >= start).all()):
-            raise SchemaError(f"asr {filename} {video.video_id}: invalid times")
-        part = pd.DataFrame(
-            {
-                "video_id": video.video_id,
-                id_column: table[id_column].astype(str).to_numpy(),
-                "start_sec": start.to_numpy(),
-                "end_sec": end.to_numpy(),
-            }
-        )
-        for column in ASR_TEXT_COLUMNS:
-            part[column] = table[column].astype(str).to_numpy()
-        parts.append(part)
-    columns = ["video_id", id_column, "start_sec", "end_sec", *ASR_TEXT_COLUMNS]
-    result = pd.concat(parts, ignore_index=True) if parts else pd.DataFrame(columns=columns)
-    result.insert(0, row_column, np.arange(len(result), dtype=np.int64))
-    return result
-
-
-def load_asr(root: Path, videos: list[VideoRef]) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Return (segments, search chunks). ASR stays interval-based; frames are joined by
-    timestamp at query time. Chunks (~25 s windows with one-segment overlap) are the
-    search unit designed at ingest; segments give finer localization."""
-    require_markers("asr", root, videos)
-    segments = _load_asr_table(
-        root,
-        videos,
-        filename="asr.parquet",
-        required=ASR_COLUMNS,
-        id_column="segment_id",
-        row_column="segment_row",
-    )
-    chunks = _load_asr_table(
-        root,
-        videos,
-        filename="asr_chunks.parquet",
-        required=ASR_CHUNK_COLUMNS,
-        id_column="chunk_id",
-        row_column="chunk_row",
-    )
-    with_speech = set(segments["video_id"])
-    if with_speech != set(chunks["video_id"]):
-        raise SchemaError("asr: videos with segments and videos with chunks differ")
-    return segments, chunks
-
-
 def write_faiss_index(matrix: np.ndarray, path: Path, *, chunk_rows: int = 65536) -> None:
     """Exact inner-product search over FP16-stored vectors (cosine, since rows are unit norm)."""
     import faiss
@@ -381,82 +240,7 @@ CREATE TABLE captions (
     frame_row INTEGER PRIMARY KEY REFERENCES frames(frame_row),
     caption_en TEXT NOT NULL,
     model_id TEXT NOT NULL
-);
-CREATE VIRTUAL TABLE captions_fts USING fts5(
-    caption_en, content='captions', content_rowid='frame_row', tokenize='porter unicode61'
-);
-
-CREATE TABLE asr_segments (
-    segment_row INTEGER PRIMARY KEY,
-    video_id TEXT NOT NULL,
-    segment_id TEXT NOT NULL,
-    start_sec REAL NOT NULL,
-    end_sec REAL NOT NULL,
-    raw_text TEXT NOT NULL,
-    normalized_text TEXT NOT NULL,
-    normalized_no_accent TEXT NOT NULL,
-    model_id TEXT NOT NULL
-);
-CREATE INDEX asr_video_time ON asr_segments(video_id, start_sec, end_sec);
-CREATE VIRTUAL TABLE asr_fts USING fts5(
-    normalized_text, normalized_no_accent,
-    content='asr_segments', content_rowid='segment_row',
-    tokenize='unicode61 remove_diacritics 2'
-);
-
-CREATE TABLE asr_chunks (
-    chunk_row INTEGER PRIMARY KEY,
-    video_id TEXT NOT NULL,
-    chunk_id TEXT NOT NULL,
-    start_sec REAL NOT NULL,
-    end_sec REAL NOT NULL,
-    raw_text TEXT NOT NULL,
-    normalized_text TEXT NOT NULL,
-    normalized_no_accent TEXT NOT NULL,
-    model_id TEXT NOT NULL
-);
-CREATE INDEX asr_chunks_video_time ON asr_chunks(video_id, start_sec, end_sec);
-CREATE VIRTUAL TABLE asr_chunks_fts USING fts5(
-    normalized_text, normalized_no_accent,
-    content='asr_chunks', content_rowid='chunk_row',
-    tokenize='unicode61 remove_diacritics 2'
-);
-
-CREATE TABLE od_frames (
-    frame_row INTEGER PRIMARY KEY REFERENCES frames(frame_row),
-    detection_count INTEGER NOT NULL,
-    status TEXT NOT NULL
-);
-CREATE TABLE od_detections (
-    frame_row INTEGER NOT NULL REFERENCES frames(frame_row),
-    class_id INTEGER NOT NULL,
-    label_en TEXT NOT NULL,
-    label_vi TEXT NOT NULL,
-    confidence REAL NOT NULL,
-    x1 REAL NOT NULL,
-    y1 REAL NOT NULL,
-    x2 REAL NOT NULL,
-    y2 REAL NOT NULL,
-    box_area_ratio REAL NOT NULL,
-    center_x REAL NOT NULL,
-    center_y REAL NOT NULL,
-    position_horizontal TEXT NOT NULL,
-    position_vertical TEXT NOT NULL
-);
-CREATE INDEX od_detections_frame ON od_detections(frame_row);
-"""
-
-POST_LOAD_SQL = """
-INSERT INTO captions_fts(captions_fts) VALUES('rebuild');
-INSERT INTO asr_fts(asr_fts) VALUES('rebuild');
-INSERT INTO asr_chunks_fts(asr_chunks_fts) VALUES('rebuild');
-CREATE TABLE od_frame_labels AS
-    SELECT frame_row, class_id, label_en, label_vi,
-           COUNT(*) AS object_count, MAX(confidence) AS max_confidence
-    FROM od_detections GROUP BY frame_row, class_id, label_en, label_vi;
-CREATE INDEX od_frame_labels_label ON od_frame_labels(label_en, object_count);
-CREATE INDEX od_frame_labels_frame ON od_frame_labels(frame_row);
-"""
+);"""
 
 
 # sqlite3 cannot bind numpy integer scalars, which pandas can yield from int64 columns.
@@ -482,10 +266,6 @@ def write_sqlite(
     *,
     frames: pd.DataFrame,
     captions: pd.DataFrame,
-    asr_segments: pd.DataFrame,
-    asr_chunks: pd.DataFrame,
-    od_frames: pd.DataFrame,
-    detections: pd.DataFrame,
 ) -> None:
     connection = sqlite3.connect(path)
     try:
@@ -493,11 +273,6 @@ def write_sqlite(
         with connection:
             _insert(connection, "frames", frames)
             _insert(connection, "captions", captions)
-            _insert(connection, "asr_segments", asr_segments)
-            _insert(connection, "asr_chunks", asr_chunks)
-            _insert(connection, "od_frames", od_frames)
-            _insert(connection, "od_detections", detections)
-        connection.executescript(POST_LOAD_SQL)
         connection.commit()
     finally:
         connection.close()
@@ -523,16 +298,10 @@ def build_index(
         for module in VISUAL_MODULES
     }
     captions = load_captions(cache_dir / "caption", frames, videos)
-    od_frames, detections = load_od(cache_dir / "od", frames, videos)
-    asr_segments, asr_chunks = load_asr(cache_dir / "asr", videos)
     visual_models = {
         module: marker_models(module, cache_dir / module, videos) for module in VISUAL_MODULES
     }
-    print(
-        f"Captions: {len(captions)} | OD detections: {len(detections)} | "
-        f"ASR segments/chunks: {len(asr_segments)}/{len(asr_chunks)}",
-        flush=True,
-    )
+    print(f"Captions (display only): {len(captions)}", flush=True)
 
     partial = output_dir.with_name(output_dir.name + ".partial")
     shutil.rmtree(partial, ignore_errors=True)
@@ -543,10 +312,6 @@ def build_index(
         partial / "metadata.sqlite",
         frames=frames,
         captions=captions,
-        asr_segments=asr_segments,
-        asr_chunks=asr_chunks,
-        od_frames=od_frames,
-        detections=detections,
     )
     manifest = {
         "index_schema_version": INDEX_SCHEMA_VERSION,
@@ -556,9 +321,6 @@ def build_index(
         "video_count": len(videos),
         "frame_count": len(frames),
         "caption_count": len(captions),
-        "asr_segment_count": len(asr_segments),
-        "asr_chunk_count": len(asr_chunks),
-        "od_detection_count": len(detections),
         "faiss": {
             module: {
                 "file": f"{module}.faiss",

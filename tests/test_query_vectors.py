@@ -12,9 +12,9 @@ import numpy as np
 import pytest
 
 from multimedia_video_rag.retrieval import encoders
-from multimedia_video_rag.retrieval.pipeline import Query
 from multimedia_video_rag.retrieval.query_vectors import (
     FORMAT_VERSION,
+    Query,
     align_to,
     load_query_vectors,
 )
@@ -60,7 +60,7 @@ def write_vectors(path: Path, *, siglip_revision: str = "rev-s", scale: float = 
 def test_load_and_align(tmp_path: Path):
     loaded = load_query_vectors(write_vectors(tmp_path / "v.npz"), MANIFEST)
     assert [query.query_id for query in loaded.queries] == ["q1", "q2"]
-    assert loaded.queries[0].objects[0].min_count == 2
+    assert loaded.queries[0] == Query("q1", "bão lũ", "flood")  # old "objects" array ignored
     assert np.isnan(loaded.vectors["beit3"][1]).all()
 
     wanted = [Query("q2", "xe buýt", ""), Query("q1", "bão lũ", "flood")]

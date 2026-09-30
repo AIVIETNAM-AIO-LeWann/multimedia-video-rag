@@ -6,20 +6,20 @@ import time
 from collections.abc import Callable, Iterable, Mapping
 from pathlib import Path
 
-from multimedia_video_rag.ingestion.audit import CONTRACTS
-
 # Files each module contributes to an index build. Keyframe images are excluded:
-# the index only needs identity/timestamps, and images are fetched on demand for display.
+# the index only needs identity/timestamps, and images are fetched separately for display
+# (scripts/download_keyframes.py). Captions are only shown next to results.
 MODULE_FILES: dict[str, tuple[str, ...]] = {
     "keyframe": ("frames.parquet", "_SUCCESS.json"),
     "siglip": ("embeddings.safetensors", "frames.parquet", "_VISUAL_SUCCESS.json"),
     "beit3": ("embeddings.safetensors", "frames.parquet", "_VISUAL_SUCCESS.json"),
-    "od": ("detections.parquet", "frames.parquet", "_OD_SUCCESS.json"),
-    "asr": ("asr.parquet", "asr_chunks.parquet", "_ASR_SUCCESS.json"),
     "caption": ("captions.parquet", "_CAPTION_SUCCESS.json"),
 }
 REPOSITORIES: dict[str, str] = {
-    contract.name: contract.repo_id for contract in CONTRACTS if contract.name in MODULE_FILES
+    "keyframe": "aqpahm/aic2026-keyframes-transnetv2",
+    "siglip": "aqpahm/aic2026-visual-siglip2-so400m",
+    "beit3": "aqpahm/aic2026-visual-beit3-large-coco-retrieval",
+    "caption": "aqpahm/aic2026-caption-blip2-opt-2.7b-coco",
 }
 
 

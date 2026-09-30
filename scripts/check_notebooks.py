@@ -1,4 +1,4 @@
-"""Validate canonical ingestion notebooks without executing GPU jobs."""
+"""Validate the notebooks in the repository without executing GPU jobs."""
 
 from __future__ import annotations
 
@@ -12,11 +12,6 @@ NOTEBOOK_DIR = ROOT / "notebooks" / "ingestion"
 RETRIEVAL_DIR = ROOT / "notebooks" / "retrieval"
 EXPECTED = {
     "extract-kf-transnetv2.ipynb": ("aqpahm/aic2026-keyframes-transnetv2", "ByteDance/shot2story"),
-    "ingest-asr-chunkformer-rnnt-large.ipynb": (
-        "aqpahm/aic2026-asr-chunkformer-rnnt-large",
-        "khanhld/chunkformer-rnnt-large-vie",
-    ),
-    "ingest-od-wedetect-large.ipynb": ("aqpahm/aic2026-od-wedetect-large", "WeDetect"),
     "ingest-visual-siglip2-so400m.ipynb": (
         "aqpahm/aic2026-visual-siglip2-so400m",
         "google/siglip2-so400m-patch16-384",
@@ -28,40 +23,6 @@ EXPECTED = {
     "ingest-caption-blip2-opt-2.7b-coco.ipynb": (
         "aqpahm/aic2026-caption-blip2-opt-2.7b-coco",
         "Salesforce/blip2-opt-2.7b-coco",
-    ),
-    "ingest-ocr-ppocrv6-medium.ipynb": (
-        "aqpahm/aic2026-ocr-ppocrv6-medium",
-        "PaddlePaddle/PP-OCRv6_medium_det",
-        "PaddlePaddle/PP-OCRv6_medium_rec",
-        "PP-OCRv6_medium_det",
-        "PP-OCRv6_medium_rec",
-        "ocr_regions.parquet",
-        "text_recognition_batch_size",
-        "polygon_json",
-        "confidence",
-        "CHECKPOINT_ROOT",
-        "RUN_CONFIG_SHA256",
-        "PREFETCH_VIDEOS_PER_GPU",
-        "MAX_PENDING_UPLOADS",
-        "finalize_upload",
-        "MAX_CONSECUTIVE_IDENTICAL_FAILURES",
-        "RUN_SMOKE_TEST_BEFORE_INGEST",
-    ),
-    "ingest-ocr-hunyuanocr.ipynb": (
-        "aqpahm/aic2026-ocr-hunyuanocr",
-        "tencent/HunyuanOCR",
-        'REQUIRED_VLLM = "0.18.1"',
-        "spotting_hunyuan",
-        "REPETITION_PENALTY = 1.08",
-        "has_tail_repetition",
-        "ocr_regions.parquet",
-        "raw_output",
-        "CHECKPOINT_ROOT",
-        "RUN_CONFIG_SHA256",
-        "MAX_PENDING_UPLOADS",
-        "finalize_upload",
-        "MAX_CONSECUTIVE_IDENTICAL_FAILURES",
-        "RUN_SMOKE_TEST_BEFORE_INGEST",
     ),
 }
 TOKEN_PATTERN = re.compile(r"hf_[A-Za-z0-9]{20,}")
