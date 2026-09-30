@@ -10,7 +10,7 @@ import numpy as np
 
 def test_sampling_uses_explicit_worker_detector():
     path = Path(__file__).resolve().parents[1] / "notebooks/ingestion/extract-kf-transnetv2.ipynb"
-    notebook = json.loads(path.read_text())
+    notebook = json.loads(path.read_text(encoding="utf-8"))
     source = next(
         "".join(cell["source"])
         for cell in notebook["cells"]
