@@ -61,6 +61,46 @@ File vector ghi model/revision đã dùng; script từ chối file encode bằng
 với ảnh trong index, hoặc khi nội dung query trong CSV đã sửa sau khi encode. Đổi
 query thì phải encode lại trên notebook.
 
+### Web UI tìm kiếm (hệ thống xuất phát điểm)
+
+Hệ thống tương tác chỉ dùng hai embedding SigLIP 2 + BEiT-3, dùng để quan sát lỗi
+trước khi quyết định hướng nghiên cứu tiếp; chưa có temporal/caption.
+
+1. Tải ảnh keyframe (khoảng 63 GB, chạy lại để tải tiếp khi bị ngắt):
+
+   ```powershell
+   uv run python scripts/download_keyframes.py --workers 8
+   ```
+
+   Không cài `hf_xet`: khi thử trên máy này, tải qua Xet chậm hơn khoảng 5 lần so với
+   HTTP thường.
+
+2. Mở `notebooks/retrieval/query-encoder-server.ipynb` trên Colab (GPU), tải lên
+   `indexes/dev/manifest.json`, Run all. Ô cuối in `ENCODER_URL` và `ENCODER_KEY`
+   (key sinh ngẫu nhiên mỗi phiên; xoá output trước khi lưu notebook).
+3. Chạy UI trên máy local rồi mở `http://127.0.0.1:8800`:
+
+   ```powershell
+   $env:ENCODER_KEY = "<key>"
+   uv run python scripts/serve_ui.py --encoder-url <ENCODER_URL>
+   ```
+
+   Không có `--encoder-url` thì chỉ tìm được các câu trong
+   `artifacts/eval/aic2026-visual-queries.csv` đã có vector trong
+   `artifacts/eval/encode/aic2026-query_vectors.npz` (đánh dấu ● trong danh sách).
+
+- Mỗi encoder lấy top 1.000 keyframe; mọi ứng viên trong hợp hai tập được chấm bằng
+  **cả hai** encoder, rồi fusion theo `rrf`, `max-norm` hoặc một encoder, với trọng số
+  SigLIP 2 chỉnh trên UI. Mặc định giữ một keyframe mỗi shot.
+- Toàn kho được chấm bằng tích ma trận–vector trên bản FP16 của vector trong index
+  (torch, khoảng 0,1 giây mỗi encoder trên CPU; FAISS bản pip không có AVX2 mất khoảng
+  1,5 giây). Lần chạy đầu giải nén vector từ FAISS và cache vào `artifacts/cache/dev/`
+  (khoảng 1,5 GB RAM và đĩa).
+- Ảnh đọc thẳng từ `keyframes.tar` theo offset, không giải nén. Bấm một kết quả để xem
+  keyframe lân cận cùng video; "Đánh dấu là đáp án" ghi vào `artifacts/labels/labels.csv`.
+- Server chỉ nghe `127.0.0.1`. Encoder server kiểm tra `X-API-Key`; UI từ chối encoder
+  có model/revision khác với index.
+
 ## 3. Cấu hình so sánh
 
 | ID | Cấu hình |
