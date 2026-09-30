@@ -2,7 +2,9 @@
 
 ## Phạm vi hiện tại
 
-Kho mã chỉ quản lý ingest/extract offline và contract artifact. Không mô tả một
+Kho mã quản lý ingest/extract offline, contract artifact và package thử nghiệm
+`src/multimedia_video_rag/retrieval` dùng để dựng index và benchmark retrieval.
+Index/fusion trong package này chỉ là cấu hình thử nghiệm. Không mô tả một
 backend, vector database, fusion strategy hay serving architecture là quyết định
 đã chốt nếu chưa có đánh giá và xác nhận riêng.
 
@@ -17,7 +19,9 @@ backend, vector database, fusion strategy hay serving architecture là quyết �
 - Resume dựa trên marker hợp lệ; không suy đoán video còn thiếu theo dãy số ID.
 - Audit completion theo đúng thành viên thực tế do BTC cung cấp.
 - Không đổi thuật toán/model hoặc schema chỉ để đồng bộ hình thức notebook.
-- Không commit token, video, model weight, keyframe, embedding hoặc cache.
+- Không commit token, video, model weight, keyframe, embedding, index hoặc cache.
+- Index retrieval chỉ được build từ video có marker hợp lệ và phải khớp đúng tập
+  `frame_uid` của keyframe; index chỉ được publish sau khi build xong toàn bộ.
 
 ## Kiểm tra
 
