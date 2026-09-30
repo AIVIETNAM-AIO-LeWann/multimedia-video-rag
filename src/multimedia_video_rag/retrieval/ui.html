@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Keyframe Search</title>
+<style>
+:root {
+  --bg: #f6f7f9; --panel: #ffffff; --text: #1b1f24; --muted: #5d6673; --line: #d9dde3;
+  --accent: #2458d6; --accent-soft: #e5ecfc; --good: #1d7a45; --bad: #b3261e; --center: #f0a100;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111418; --panel: #1a1e24; --text: #e6e8eb; --muted: #9aa3ae; --line: #2c323a;
+    --accent: #7ea2ff; --accent-soft: #1f2a44; --good: #5cc98b; --bad: #ff8a80; --center: #ffc14d;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+header { position: sticky; top: 0; z-index: 5; background: var(--panel);
+  border-bottom: 1px solid var(--line); padding: 12px 16px; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+textarea { flex: 1 1 420px; min-height: 44px; resize: vertical; padding: 8px 10px;
+  border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); font: inherit; }
+select, input[type=number], button { font: inherit; padding: 6px 10px; border-radius: 6px;
+  border: 1px solid var(--line); background: var(--bg); color: var(--text); }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+button:disabled { opacity: .5; }
+label { color: var(--muted); display: inline-flex; gap: 6px; align-items: center; }
+#status { color: var(--muted); font-size: 13px; margin-top: 6px; }
+#status .err { color: var(--bad); }
+main { padding: 16px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; cursor: pointer; }
+.card:hover { border-color: var(--accent); }
+.thumb { aspect-ratio: 16/9; width: 100%; object-fit: cover; display: block; background: var(--line); }
+.noimg { aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; color: var(--muted); background: var(--bg); font-size: 12px; }
+.meta { padding: 6px 8px; font-size: 12px; }
+.meta b { font-size: 13px; }
+.ranks { color: var(--muted); }
+.drawer { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: none; z-index: 10; }
+.drawer.open { display: block; }
+.sheet { position: absolute; inset: 24px; max-width: 1200px; margin: 0 auto; background: var(--panel);
+  border-radius: 10px; overflow: auto; padding: 16px; }
+.sheet img.big { width: 100%; max-height: 60vh; object-fit: contain; background: #000; border-radius: 6px; }
+.strip { display: flex; gap: 6px; overflow-x: auto; padding: 8px 0; }
+.strip figure { margin: 0; flex: 0 0 150px; cursor: pointer; border: 2px solid transparent; border-radius: 6px; overflow: hidden; }
+.strip figure.center { border-color: var(--center); }
+.strip figcaption { font-size: 11px; color: var(--muted); padding: 2px 4px; }
+.kv { display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; margin: 8px 0; font-size: 13px; }
+.kv dt { color: var(--muted); }
+.close { float: right; }
+.vi { flex: 1 1 100%; margin-top: 8px; padding: 8px 10px; border-left: 3px solid var(--accent);
+  background: var(--accent-soft); border-radius: 4px; }
+.vi small { color: var(--muted); display: block; }
+.saved { color: var(--good); margin-left: 8px; }
+@media (max-width: 600px) {
+  .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .sheet { inset: 0; border-radius: 0; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="row">
+    <select id="preset" title="Câu truy vấn trong bộ đánh giá"><option value="">— câu tự nhập —</option></select>
+  </div>
+  <div class="row" style="margin-top:8px">
+    <textarea id="query" placeholder="Nhập câu truy vấn tiếng Anh, Enter để tìm (Shift+Enter xuống dòng)"></textarea>
+    <div id="vi" class="vi" hidden></div>
+  </div>
+  <div class="row" style="margin-top:8px">
+    <label>Fusion <select id="fusion"></select></label>
+    <label>Trọng số SigLIP 2 <input id="weight" type="number" min="0" max="1" step="0.1" value="0.5" style="width:70px"></label>
+    <label><input id="collapse" type="checkbox" checked> Mỗi shot 1 keyframe</label>
+    <label>Số kết quả <input id="limit" type="number" min="10" max="500" step="10" value="100" style="width:80px"></label>
+    <button id="go" class="primary">Tìm</button>
+  </div>
+  <div id="status">Đang tải…</div>
+</header>
+<main><div id="grid" class="grid"></div></main>
+
+<div id="drawer" class="drawer"><div class="sheet" id="sheet"></div></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let info = null, lastResults = [], lastRequest = null;
+
+function esc(s) { return String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function img(item, cls) {
+  return item.image ? `<img class="${cls}" loading="lazy" src="/img/${item.row}" alt="">`
+                    : `<div class="noimg">chưa tải ảnh ${esc(item.video_id)}</div>`;
+}
+function status(html) { $("status").innerHTML = html; }
+
+async function loadInfo() {
+  info = await (await fetch("/api/info")).json();
+  $("fusion").innerHTML = info.fusions.map(f => `<option>${f}</option>`).join("");
+  $("preset").innerHTML += info.queries.map(q =>
+    `<option value="${esc(q.query_id)}">${esc(q.query_id)}${q.stored ? " ●" : ""} — ${esc((q.original_vi || q.query_en).slice(0, 110))}</option>`).join("");
+  status(`${info.videos} video · ${info.frames.toLocaleString()} keyframe · ảnh đã tải: ${info.images_downloaded}/${info.videos} video · encoder: <b>${esc(info.encoder)}</b>` +
+    (info.encoder === "off" ? " (chỉ tìm được câu có ● trong danh sách)" : ""));
+}
+
+function selected() { return info.queries.find(q => q.query_id === $("preset").value); }
+function showVi() {
+  const q = selected();
+  const edited = q && q.query_en.trim() !== $("query").value.trim();
+  $("vi").hidden = !(q && q.original_vi);
+  if (q && q.original_vi) {
+    $("vi").innerHTML = `<small>Nguyên văn tiếng Việt (${esc(q.query_id)})` +
+      `${edited ? " — câu tiếng Anh ở trên đã bị sửa" : " — hệ thống tìm bằng câu tiếng Anh ở trên"}</small>${esc(q.original_vi)}`;
+  }
+}
+$("preset").onchange = () => {
+  const q = selected();
+  $("query").value = q ? q.query_en : "";
+  showVi();
+  if (q) search();
+};
+$("query").addEventListener("input", showVi);
+$("query").addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); search(); }
+});
+$("go").onclick = () => search();
+
+async function search() {
+  const query = $("query").value.trim();
+  if (!query) return;
+  const q = info.queries.find(q => q.query_id === $("preset").value);
+  lastRequest = {
+    query, query_id: q && q.query_en.trim() === query ? q.query_id : "",
+    fusion: $("fusion").value, weight_siglip: parseFloat($("weight").value),
+    collapse_shots: $("collapse").checked, limit: parseInt($("limit").value, 10),
+  };
+  $("go").disabled = true; status("Đang tìm…");
+  try {
+    const r = await fetch("/api/search", {method: "POST", body: JSON.stringify(lastRequest)});
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error);
+    lastResults = data.results;
+    status(`${data.results.length} kết quả · vector: ${data.vector_source} · encode ${data.encode_ms} ms · tìm ${data.search_ms} ms`);
+    $("grid").innerHTML = data.results.map((item, i) => `
+      <div class="card" data-i="${i}">
+        ${img(item, "thumb")}
+        <div class="meta"><b>#${i + 1}</b> ${esc(item.video_id)} · ${item.clock}
+          <div class="ranks">SigLIP #${item.rank.siglip} · BEiT-3 #${item.rank.beit3}</div></div>
+      </div>`).join("");
+    document.querySelectorAll(".card").forEach(card =>
+      card.onclick = () => openFrame(lastResults[+card.dataset.i], +card.dataset.i + 1));
+  } catch (err) {
+    status(`<span class="err">Lỗi: ${esc(err.message)}</span>`);
+  } finally { $("go").disabled = false; }
+}
+
+async function openFrame(item, rank) {
+  $("drawer").classList.add("open");
+  const ctx = await (await fetch(`/api/context?row=${item.row}&radius=10`)).json();
+  const center = ctx.frames.find(f => f.row === item.row) || item;
+  const sim = item.similarity ? `<dt>Cosine</dt><dd>SigLIP ${item.similarity.siglip.toFixed(4)} · BEiT-3 ${item.similarity.beit3.toFixed(4)}</dd>
+    <dt>Hạng</dt><dd>kết quả #${rank ?? "–"} · SigLIP #${item.rank.siglip} · BEiT-3 #${item.rank.beit3}</dd>` : "";
+  const q = lastRequest && info.queries.find(q => q.query_id === lastRequest.query_id);
+  $("sheet").innerHTML = `
+    <button class="close" onclick="closeDrawer()">Đóng (Esc)</button>
+    ${q && q.original_vi ? `<div class="vi" style="margin:0 0 10px"><small>Câu truy vấn ${esc(q.query_id)}</small>${esc(q.original_vi)}</div>` : ""}
+    <h3 style="margin:0 0 8px">${esc(center.video_id)} · ${center.clock} (${center.time}s)</h3>
+    ${center.image ? `<img class="big" src="/img/${center.row}" alt="">` : img(center, "big")}
+    <dl class="kv">
+      <dt>frame_uid</dt><dd>${esc(center.frame_uid)} · shot ${center.shot}</dd>
+      <dt>Caption</dt><dd>${esc(center.caption)}</dd>${sim}
+    </dl>
+    <div class="row">
+      <input id="note" placeholder="ghi chú (tuỳ chọn)" style="flex:1 1 240px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text)">
+      <button class="primary" id="mark">Đánh dấu là đáp án</button><span id="saved" class="saved"></span>
+    </div>
+    <h4 style="margin:12px 0 0">Keyframe lân cận (cùng video)</h4>
+    <div class="strip">${ctx.frames.map(f => `
+      <figure class="${f.row === center.row ? "center" : ""}" data-row="${f.row}">
+        ${img(f, "thumb")}<figcaption>${f.clock} · shot ${f.shot}</figcaption></figure>`).join("")}</div>`;
+  document.querySelectorAll(".strip figure").forEach(fig => fig.onclick = () => {
+    const row = +fig.dataset.row;
+    const hit = lastResults.findIndex(r => r.row === row);
+    openFrame(hit >= 0 ? lastResults[hit] : ctx.frames.find(f => f.row === row), hit >= 0 ? hit + 1 : null);
+  });
+  $("mark").onclick = async () => {
+    if (!lastRequest) return;
+    const r = await fetch("/api/label", {method: "POST", body: JSON.stringify({
+      ...lastRequest, row: center.row, rank: rank ?? "", note: $("note").value})});
+    const data = await r.json();
+    $("saved").textContent = r.ok ? `đã lưu vào ${data.saved}` : `lỗi: ${data.error}`;
+  };
+}
+function closeDrawer() { $("drawer").classList.remove("open"); }
+$("drawer").onclick = e => { if (e.target.id === "drawer") closeDrawer(); };
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
+loadInfo().catch(err => status(`<span class="err">Không tải được thông tin: ${esc(err.message)}</span>`));
+</script>
+</body>
+</html>

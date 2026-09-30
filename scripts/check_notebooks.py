@@ -8,6 +8,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 NOTEBOOK_DIR = ROOT / "notebooks" / "ingestion"
+# Query-time helpers: only the hygiene checks apply (no outputs, counts or tokens).
+RETRIEVAL_DIR = ROOT / "notebooks" / "retrieval"
 EXPECTED = {
     "extract-kf-transnetv2.ipynb": ("aqpahm/aic2026-keyframes-transnetv2", "ByteDance/shot2story"),
     "ingest-asr-chunkformer-rnnt-large.ipynb": (
@@ -27,6 +29,40 @@ EXPECTED = {
         "aqpahm/aic2026-caption-blip2-opt-2.7b-coco",
         "Salesforce/blip2-opt-2.7b-coco",
     ),
+    "ingest-ocr-ppocrv6-medium.ipynb": (
+        "aqpahm/aic2026-ocr-ppocrv6-medium",
+        "PaddlePaddle/PP-OCRv6_medium_det",
+        "PaddlePaddle/PP-OCRv6_medium_rec",
+        "PP-OCRv6_medium_det",
+        "PP-OCRv6_medium_rec",
+        "ocr_regions.parquet",
+        "text_recognition_batch_size",
+        "polygon_json",
+        "confidence",
+        "CHECKPOINT_ROOT",
+        "RUN_CONFIG_SHA256",
+        "PREFETCH_VIDEOS_PER_GPU",
+        "MAX_PENDING_UPLOADS",
+        "finalize_upload",
+        "MAX_CONSECUTIVE_IDENTICAL_FAILURES",
+        "RUN_SMOKE_TEST_BEFORE_INGEST",
+    ),
+    "ingest-ocr-hunyuanocr.ipynb": (
+        "aqpahm/aic2026-ocr-hunyuanocr",
+        "tencent/HunyuanOCR",
+        'REQUIRED_VLLM = "0.18.1"',
+        "spotting_hunyuan",
+        "REPETITION_PENALTY = 1.08",
+        "has_tail_repetition",
+        "ocr_regions.parquet",
+        "raw_output",
+        "CHECKPOINT_ROOT",
+        "RUN_CONFIG_SHA256",
+        "MAX_PENDING_UPLOADS",
+        "finalize_upload",
+        "MAX_CONSECUTIVE_IDENTICAL_FAILURES",
+        "RUN_SMOKE_TEST_BEFORE_INGEST",
+    ),
 }
 TOKEN_PATTERN = re.compile(r"hf_[A-Za-z0-9]{20,}")
 
@@ -34,10 +70,14 @@ TOKEN_PATTERN = re.compile(r"hf_[A-Za-z0-9]{20,}")
 def main() -> None:
     errors: list[str] = []
     found = {path.name for path in NOTEBOOK_DIR.glob("*.ipynb")}
-    if found != set(EXPECTED):
-        errors.append(f"notebook set mismatch: expected {sorted(EXPECTED)}, found {sorted(found)}")
+    expected_names = set(EXPECTED)
+    if found != expected_names:
+        errors.append(
+            f"notebook set mismatch: expected {sorted(expected_names)}, found {sorted(found)}"
+        )
 
-    for name, required_strings in EXPECTED.items():
+    notebooks = EXPECTED
+    for name, required_strings in notebooks.items():
         path = NOTEBOOK_DIR / name
         if not path.is_file():
             continue
@@ -54,9 +94,17 @@ def main() -> None:
         for runtime in ("colab", "kaggle"):
             if runtime not in source.lower():
                 errors.append(f"{name}: missing {runtime} runtime support/documentation")
-        for capability in ("GPU_IDS", "torch.cuda.device_count()", "ThreadPoolExecutor"):
-            if capability not in source:
-                errors.append(f"{name}: missing adaptive GPU capability {capability!r}")
+        if name in EXPECTED:
+            for capability in ("GPU_IDS", "ThreadPoolExecutor"):
+                if capability not in source:
+                    errors.append(f"{name}: missing adaptive GPU capability {capability!r}")
+            gpu_count_apis = (
+                "torch.cuda.device_count()",
+                "paddle.device.cuda.device_count()",
+                "nvidia-smi",
+            )
+            if not any(value in source for value in gpu_count_apis):
+                errors.append(f"{name}: missing adaptive GPU count API")
         if TOKEN_PATTERN.search(source):
             errors.append(f"{name}: appears to contain a literal Hugging Face token")
         for index, cell in enumerate(notebook.get("cells", [])):
@@ -65,9 +113,21 @@ def main() -> None:
             if cell.get("outputs"):
                 errors.append(f"{name}: cell {index} contains output")
 
+    retrieval = sorted(RETRIEVAL_DIR.glob("*.ipynb"))
+    for path in retrieval:
+        notebook = json.loads(path.read_text(encoding="utf-8"))
+        source = "\n".join("".join(cell.get("source", [])) for cell in notebook.get("cells", []))
+        if TOKEN_PATTERN.search(source):
+            errors.append(f"{path.name}: appears to contain a literal Hugging Face token")
+        for index, cell in enumerate(notebook.get("cells", [])):
+            if cell.get("execution_count") is not None:
+                errors.append(f"{path.name}: cell {index} has execution_count")
+            if cell.get("outputs"):
+                errors.append(f"{path.name}: cell {index} contains output")
+
     if errors:
         raise SystemExit("Notebook checks failed:\n- " + "\n- ".join(errors))
-    print(f"Validated {len(EXPECTED)} clean ingestion notebooks.")
+    print(f"Validated {len(EXPECTED)} ingestion and {len(retrieval)} retrieval notebooks.")
 
 
 if __name__ == "__main__":

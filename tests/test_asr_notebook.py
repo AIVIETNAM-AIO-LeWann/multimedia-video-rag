@@ -23,7 +23,7 @@ NOTEBOOK = (
 
 @pytest.fixture
 def notebook_code():
-    notebook = json.loads(NOTEBOOK.read_text())
+    notebook = json.loads(NOTEBOOK.read_text(encoding="utf-8"))
     trees = [
         ast.parse("".join(cell["source"]))
         for cell in notebook["cells"]
@@ -157,7 +157,7 @@ def test_recovery_of_two_consecutive_videos(notebook_code, tmp_path, with_speech
         directory = namespace["OUTPUT_DIR"] / "L21" / video_id
         raw = pd.read_parquet(directory / "asr.parquet")
         chunks = pd.read_parquet(directory / "asr_chunks.parquet")
-        marker = json.loads((directory / "_ASR_SUCCESS.json").read_text())
+        marker = json.loads((directory / "_ASR_SUCCESS.json").read_text(encoding="utf-8"))
         assert list(raw.columns) == namespace["RAW_COLUMNS"]
         assert list(chunks.columns) == namespace["CHUNK_COLUMNS"]
         assert len(raw) == len(chunks) == int(with_speech)

@@ -1,0 +1,92 @@
+query_id,source,source_file,task,status,reason
+p1-1,SOTUYEN1,query-p1-1-kis.txt,kis,needs_verification,Một người đeo kính và đúng ba nón đỏ là chi tiết nhỏ; cần xác nhận còn rõ trong keyframe.
+p1-2,SOTUYEN1,query-p1-2-kis.txt,kis,needs_verification,Bốn biểu tượng xuất hiện lần lượt trên bản đồ và cảnh mưa có thể bị lấy mẫu thưa bỏ lỡ.
+p1-3,SOTUYEN1,query-p1-3-qa.txt,qa,retrieval_only,Tìm cảnh cá và cân được bằng hình; đáp án là chữ số trên màn hình cân.
+p1-4,SOTUYEN1,query-p1-4-kis.txt,kis,needs_verification,Tên London Zoo trên bảng là chữ; cần xác nhận hai cảnh sư tử và cân thú đủ định danh khi bỏ tên.
+p1-5,SOTUYEN1,query-p1-5-kis.txt,kis,core,Cảnh xào mực với đậu và cảnh lắc chảo đều là sự kiện nhìn thấy rõ.
+p1-6,SOTUYEN1,query-p1-6-kis.txt,kis,core,Người cầm đá quý cùng cảnh mỏ lộ thiên tạo chuỗi thị giác đặc trưng.
+p1-7,SOTUYEN1,query-p1-7-kis.txt,kis,core,Cà rốt hình sao đang luộc và đĩa thành phẩm là hai cảnh thị giác phân biệt được.
+p1-8,SOTUYEN1,query-p1-8-kis.txt,kis,core,Chuỗi sắp nguyên liệu dạng thanh và hình hoa quanh đĩa là nội dung nhìn thấy được.
+p1-9,SOTUYEN1,query-p1-9-qa.txt,qa,retrieval_only,Tìm chuỗi ô tô qua cầu được bằng hình; đáp án phải đọc số trên biển báo.
+p1-10,SOTUYEN1,query-p1-10-kis.txt,kis,needs_verification,Sợi dây xanh trên cuống nho rất nhỏ so với khung ảnh 384 pixel.
+p1-11,SOTUYEN1,query-p1-11-kis.txt,kis,needs_verification,Thứ tự nhất nhì ba tại vạch đích diễn ra rất nhanh; keyframe có thể không giữ đủ mốc.
+p1-12,SOTUYEN1,query-p1-12-kis.txt,kis,needs_verification,Có chi tiết bảng giá dầu bằng chữ; cần xác nhận nhóm tài xế và thao tác đổ xăng đủ định danh.
+p1-13,SOTUYEN1,query-p1-13-kis.txt,kis,core,Rọi đèn dưới nước rồi kéo lưới lúc bình minh và nhóm quay phim là chuỗi hình đặc trưng.
+p1-14,SOTUYEN1,query-p1-14-kis.txt,kis,exclude,Nội dung trùng hoàn toàn với p1-8; không tạo thêm mẫu đánh giá độc lập.
+p1-15,SOTUYEN1,query-p1-15-qa.txt,qa,retrieval_only,Cần đọc ký hiệu mức động đất 4 trong chú giải rồi mới đếm vị trí tương ứng.
+p1-16,SOTUYEN1,query-p1-16-trake.txt,trake,needs_verification,TRAKE yêu cầu lần đầu hiện hai rồng; hoàn tất xoay và dùi chạm kẻng; mốc ngắn hơn khoảng lấy keyframe.
+p1-17,SOTUYEN1,query-p1-17-qa.txt,qa,retrieval_only,Có thể tìm cảnh sạt lở bằng hình; tên con đèo cần lời dẫn hoặc chữ.
+p1-18,SOTUYEN1,query-p1-18-kis.txt,kis,needs_verification,Thứ tự từng vá và cọng ngò cuối cùng có thể rơi giữa các keyframe; cần kiểm tra cảnh thành phẩm.
+p1-19,SOTUYEN1,query-p1-19-kis.txt,kis,needs_verification,Cú nhảy và ngoạm bí đỏ là động tác ngắn; cần xác nhận ảnh lấy mẫu bắt được.
+p1-20,SOTUYEN1,query-p1-20-kis.txt,kis,needs_verification,Hình gấu trên áo mưa và số người cầm dù có thể quá nhỏ hoặc bị che.
+p1-21,SOTUYEN1,query-p1-21-kis.txt,kis,core,Tôm trên đĩa; ba ổ bánh mì và cảnh chế biến là chuỗi hình có thể phân biệt.
+p1-22,SOTUYEN1,query-p1-22-kis.txt,kis,exclude,Điểm phân biệt là nghĩa và cách dùng động từ remember; cần đọc bảng hoặc nghe giảng.
+p1-23,SOTUYEN1,query-p1-23-kis.txt,kis,needs_verification,Sơ đồ và ô màu là thị giác nhưng nhiều hộp nhỏ; cần xem chúng còn phân biệt ở 384 pixel.
+p1-24,SOTUYEN1,query-p1-24-kis.txt,kis,needs_verification,Bốn đồ vật xuất hiện theo thứ tự trong một cú lia máy; lấy mẫu hai giây có thể bỏ sót.
+p1-25,SOTUYEN1,query-p1-25-kis.txt,kis,core,Hai học sinh trên sân khấu với trống đỏ và piano là bố cục nhìn thấy được.
+p2-1,SOTUYEN2,query-p2-1-kis.txt,kis,needs_verification,Việc giấu bí và người đàn ông thức dậy là hình; suy luận không thấy quả bí hay đánh thức con vật cần chuỗi đủ dày.
+p2-2,SOTUYEN2,query-p2-2-kis.txt,kis,core,Tranh tê giác và graffiti ba con khỉ là hai mốc hình đặc trưng.
+p2-3,SOTUYEN2,query-p2-3-kis.txt,kis,core,Lân vàng ở gần mô hình tàu xanh là tổ hợp vật thể và màu đặc trưng.
+p2-4,SOTUYEN2,query-p2-4-kis.txt,kis,needs_verification,Hai em bé áo vàng là chi tiết in trên băng-rôn; cần kiểm tra độ rõ trong keyframe.
+p2-5,SOTUYEN2,query-p2-5-kis.txt,kis,core,Người áo đỏ dội nước lên mặt và hai tay đua là các mốc hình trực tiếp.
+p2-6,SOTUYEN2,query-p2-6-kis.txt,kis,core,Hai người nằm dài trên xe máy và vòng khoanh đỏ là dấu hiệu hình trực tiếp.
+p2-7,SOTUYEN2,query-p2-7-qa.txt,qa,retrieval_only,Cảnh xe tự lái có thể tìm bằng hình; đáp án phải đọc số trên thân xe.
+p2-8,SOTUYEN2,query-p2-8-trake.txt,trake,needs_verification,TRAKE yêu cầu lần đầu xuất hiện bốn loại quả; cần xác nhận mỗi cảnh quả có keyframe ở đúng đầu mốc.
+p2-9,SOTUYEN2,query-p2-9-qa.txt,qa,needs_verification,QA hỏi loài cá; cần thấy đủ đặc điểm nhận dạng của cá chứ không suy từ lời nấu ăn.
+p2-10,SOTUYEN2,query-p2-10-kis.txt,kis,core,Đầu bếp xào dồi trường trắng với bông hẹ xanh là cảnh hình cụ thể.
+p2-11,SOTUYEN2,query-p2-11-kis.txt,kis,core,Que nguyên liệu lần lượt lăn qua hỗn hợp màu rồi phủ bột là chuỗi hình cụ thể.
+p2-12,SOTUYEN2,query-p2-12-qa.txt,qa,core,QA hỏi số bánh mỗi khuôn; số ô của khuôn có thể đếm trực tiếp từ hình.
+p2-13,SOTUYEN2,query-p2-13-kis.txt,kis,core,Hỗn hợp trong chảo và hành động thêm chanh rồi trút ra đĩa có dấu hiệu hình.
+p2-14,SOTUYEN2,query-p2-14-kis.txt,kis,needs_verification,Sợi dây trắng dưới quai mũ đỏ là chi tiết rất nhỏ; cần kiểm tra ảnh thực tế.
+p2-15,SOTUYEN2,query-p2-15-kis.txt,kis,exclude,Ba cảnh chỉ mô tả góc máy và hải sản không tên; thiếu đặc điểm hình để xác định mục tiêu.
+p2-16,SOTUYEN2,query-p2-16-kis.txt,kis,core,Hai phụ nữ làm thủ công trước dãy thớt treo ngang là bố cục đặc trưng.
+p2-17,SOTUYEN2,query-p2-17-kis.txt,kis,exclude,Nội dung dòng chữ 3D là điều kiện định danh; cần đọc chữ.
+p2-18,SOTUYEN2,query-p2-18-kis.txt,kis,exclude,Tên đường và số giây trên đèn là các điều kiện phân biệt phải đọc chữ hoặc số.
+p2-19,SOTUYEN2,query-p2-19-qa.txt,qa,exclude,Ý nghĩa sự kiện trợ giúp quán trọ và đáp án tên đường cần lời dẫn hoặc chữ; hình còn lại quá chung.
+p2-20,SOTUYEN2,query-p2-20-kis.txt,kis,exclude,Phải đọc bảng số liệu và vùng địa lý để xác định nội dung bài giảng.
+p2-21,SOTUYEN2,query-p2-21-trake.txt,trake,core,TRAKE gồm bốn cảnh đóng thùng; xếp mì và bánh; bê thùng; chất thùng trên xe đều nhìn thấy và kéo dài theo cảnh.
+p2-22,SOTUYEN2,query-p2-22-kis.txt,kis,needs_verification,Vết khứa trên cả hai mặt nguyên liệu và gia vị nhỏ có thể không rõ trong keyframe.
+p2-23,SOTUYEN2,query-p2-23-qa.txt,qa,exclude,Số câu; nhãn loài cây và đáp án độ mặn đều nằm trong chữ hoặc biểu đồ cần đọc.
+p2-24,SOTUYEN2,query-p2-24-kis.txt,kis,needs_verification,Quốc tịch và địa danh không nhìn thấy; cần xác nhận tư thế ăn mừng cùng áo vàng cam đủ định danh.
+p2-25,SOTUYEN2,query-p2-25-kis.txt,kis,core,Giáo viên ở góc màn hình và ảnh cô gái cầm cốc cạnh laptop tạo bố cục hình đặc trưng.
+p2-26,SOTUYEN2,query-p2-26-kis.txt,kis,core,Hình người đỏ giữa nhóm trắng và tranh kéo co là hai đồ họa nhìn thấy được.
+p2-27,SOTUYEN2,query-p2-27-qa.txt,qa,retrieval_only,Đáp án là số nào không xuất hiện trên cột; phải đọc các chữ số qua nhiều frame.
+p2-28,SOTUYEN2,query-p2-28-qa.txt,qa,retrieval_only,Tìm tô cháo và topping được bằng hình; nguồn thịt của topping dạng sợi không suy ra chắc chắn từ hình thành phẩm.
+p2-29,SOTUYEN2,query-p2-29-qa.txt,qa,retrieval_only,Đáp án là trọng lượng viết trong bảng nguyên liệu; cần đọc chữ và số.
+p2-30,SOTUYEN2,query-p2-30-qa.txt,qa,needs_verification,QA hỏi con vật X; cần xác nhận hình nguyên liệu đủ rõ để nhận dạng độc lập với đối thoại.
+p3-1,SOTUYEN3,query-p2-1-kis.txt,kis,core,Đổ trứng vào súp và cắt đậu hũ trên nồi là chuỗi thao tác nhìn thấy.
+p3-2,SOTUYEN3,query-p2-2-kis.txt,kis,needs_verification,Các bảng ghi số lớp là một phần mô tả; cần xem chuỗi học sinh di chuyển đủ phân biệt khi không đọc số.
+p3-3,SOTUYEN3,query-p2-3-kis.txt,kis,core,Các nhóm nguyên liệu màu cam; dạng ống; rau nấm; thịt vào nồi theo thứ tự thị giác.
+p3-4,SOTUYEN3,query-p2-4-kis.txt,kis,exclude,Các câu ví dụ và công thức ngữ pháp trên bảng là nội dung định danh bắt buộc.
+p3-5,SOTUYEN3,query-p2-5-qa.txt,qa,exclude,Vùng kinh tế và đáp án số tỉnh thành cần đọc bài giảng hoặc nghe lời nói.
+p3-6,SOTUYEN3,query-p2-6-qa.txt,qa,exclude,Bài văn và đáp án về tác giả dựa trên chữ hoặc lời giảng.
+p3-7,SOTUYEN3,query-p2-7-kis.txt,kis,needs_verification,Hai người đi xe bất cẩn là hình nhưng mô tả chung; cần xem có đủ dấu hiệu phân biệt video khác.
+p3-8,SOTUYEN3,query-p2-8-qa.txt,qa,retrieval_only,Có thể tìm cảnh phỏng vấn và biển neon; đáp án phải đọc chữ neon.
+p3-9,SOTUYEN3,query-p2-9-kis.txt,kis,core,Trình diễn thời trang vải nhiều màu và đồ thủ công ngoài trời là chuỗi hình đặc trưng.
+p3-10,SOTUYEN3,query-p2-10-kis.txt,kis,core,Xe hình ô tô cổ điển chạy trên nước là dấu hiệu hình mạnh và trực tiếp.
+p3-11,SOTUYEN3,query-p2-11-kis.txt,kis,needs_verification,Nguyên liệu và máy chỉ mô tả bằng hình dạng chung; cần xem ảnh có đủ phân biệt.
+p3-12,SOTUYEN3,query-p2-12-kis.txt,kis,core,Chất lỏng đổ vào chảo đỏ tạo ngọn lửa hồng là sự kiện nhìn thấy.
+p3-13,SOTUYEN3,query-p2-13-kis.txt,kis,core,Hàng trăm lờ tre cạnh sông; dừa và ghe là bối cảnh hình đặc trưng.
+p3-14,SOTUYEN3,query-p2-14-qa.txt,qa,retrieval_only,Bé gái bơi tìm được bằng hình; lớp sắp lên phải nghe phỏng vấn hoặc đọc phụ đề.
+p3-15,SOTUYEN3,query-p2-15-kis.txt,kis,needs_verification,Nguyên liệu chính không định danh và thao tác nấu khá chung; cần kiểm tra tính phân biệt.
+p3-16,SOTUYEN3,query-p2-16-kis.txt,kis,exclude,Các lượng 1.5L; nửa muỗng; vị mặn ngọt và vị xương là điều kiện chính nhưng không xác định chắc từ ảnh.
+p3-17,SOTUYEN3,query-p2-17-kis.txt,kis,needs_verification,Nguyên liệu và dụng cụ đều không định danh; cần kiểm tra thao tác cắt và tách vỏ có đủ phân biệt.
+p3-18,SOTUYEN3,query-p2-18-qa.txt,qa,retrieval_only,Lớp học tìm được bằng hình; tên trường của giáo viên cần lời dẫn hoặc chữ.
+p3-19,SOTUYEN3,query-p2-19-kis.txt,kis,needs_verification,Bốn nhịp há miệng và thả hoa là sự kiện ngắn; tiếng chập cheng không dùng được và keyframe có thể bỏ mốc.
+p3-20,SOTUYEN3,query-p2-20-kis.txt,kis,needs_verification,Sơ đồ phân tử có vòng tròn tím rất nhỏ; cần xác nhận còn đọc được bố cục bằng mắt ở ảnh lưu.
+p3-21,SOTUYEN3,query-p2-21-trake.txt,trake,needs_verification,TRAKE có thành phần nước xốt và mốc đầu tôm chạm đĩa; tép cam thứ tư là các chi tiết rất ngắn.
+p3-22,SOTUYEN3,query-p2-22-kis.txt,kis,needs_verification,Thiết bị chạy điện và nước Tây Âu không xác định từ ảnh; cần xác nhận hình máy bay và khu vườn đủ định danh.
+p3-23,SOTUYEN3,query-p2-23-kis.txt,kis,core,Đua trâu trên ruộng bùn rồi cặp trâu trắng là hai cảnh hình trực tiếp.
+p3-24,SOTUYEN3,query-p2-24-qa.txt,qa,retrieval_only,Tìm cảnh đầu bếp bằng hình; lượng nước tương phải nghe lời nói hoặc đọc thông tin.
+p3-25,SOTUYEN3,query-p2-25-kis.txt,kis,core,Nhúng thịt rồi cho vào tô có sợi và chan nước là chuỗi hình cụ thể.
+p3-26,SOTUYEN3,query-p2-26-kis.txt,kis,needs_verification,Các nét đứt; ký hiệu góc vuông và chi tiết sơ đồ có thể quá nhỏ ở ảnh embedding.
+p3-27,SOTUYEN3,query-p2-27-qa.txt,qa,core,QA hỏi số màu bột trên đĩa; có thể đếm trực tiếp từ hình thành phẩm.
+p3-28,SOTUYEN3,query-p2-28-kis.txt,kis,needs_verification,Logo xanh trên bao đồ là chi tiết nhỏ; cần xác nhận độ rõ và tính phân biệt.
+p3-29,SOTUYEN3,query-p2-29-kis.txt,kis,needs_verification,Hai lần múc canh có thể diễn ra giữa các keyframe; cảnh còn lại khá chung.
+p3-30,SOTUYEN3,query-p2-30-kis.txt,kis,core,Phất cờ về đích; đoàn đua vào cua và người cầm hai thiết bị quay là chuỗi hình phân biệt.
+p3-31,SOTUYEN3,query-p2-31-kis.txt,kis,core,Người tóc sáng ngồi gói bánh lá cạnh quạt cánh xanh là bố cục hình cụ thể.
+p3-32,SOTUYEN3,query-p2-32-kis.txt,kis,needs_verification,Quan hệ mẹ con và nội dung trò chuyện không nhìn thấy; cần xác nhận hai cảnh còn lại đủ định danh.
+p3-33,SOTUYEN3,query-p2-33-kis.txt,kis,needs_verification,Ai thắng màn nước rút là diễn biến ngắn; trạng thái đuối sức mang tính suy diễn.
+p3-34,SOTUYEN3,query-p2-34-trake.txt,trake,needs_verification,TRAKE có nhiều tư thế lân và khoảnh khắc đầu tiên cắn trụ rất ngắn; keyframe thưa có thể bỏ lỡ.
+p3-35,SOTUYEN3,query-p2-35-qa.txt,qa,exclude,Nhóm X và bốn đáp án trắc nghiệm đều là chữ và số trên màn hình.
+p3-36,SOTUYEN3,query-p2-36-kis.txt,kis,needs_verification,Nhận diện Bác Hồ và vật liệu bút là chi tiết khó; cần kiểm tra chuỗi lia máy còn đủ định danh.
