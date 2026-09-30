@@ -18,7 +18,9 @@ nhân và được giữ ngoài repository.
 | [`ingest-od-wedetect-large.ipynb`](ingestion/ingest-od-wedetect-large.ipynb) | Dataset keyframe | WeDetect Large, vocabulary AIC 400 nhãn | `aqpahm/aic2026-od-wedetect-large` | `detections.parquet`, `frames.parquet`, `_OD_SUCCESS.json` |
 | [`ingest-visual-siglip2-so400m.ipynb`](ingestion/ingest-visual-siglip2-so400m.ipynb) | Dataset keyframe | SigLIP 2 So400m Patch16 384 | `aqpahm/aic2026-visual-siglip2-so400m` | `embeddings.safetensors`, `frames.parquet`, `_VISUAL_SUCCESS.json` |
 | [`ingest-visual-beit3-large-coco-retrieval.ipynb`](ingestion/ingest-visual-beit3-large-coco-retrieval.ipynb) | Dataset keyframe | BEiT-3 Large Patch16 384, COCO Retrieval | `aqpahm/aic2026-visual-beit3-large-coco-retrieval` | `embeddings.safetensors`, `frames.parquet`, `_VISUAL_SUCCESS.json` |
-| [`ingest-caption-blip2-opt-2.7b-coco.ipynb`](ingestion/ingest-caption-blip2-opt-2.7b-coco.ipynb) | Dataset keyframe | BLIP-2 OPT 2.7B fine-tuned on COCO | `aqpahm/aic2026-caption-blip2-opt-2.7b-coco` (dự kiến) | `captions.parquet`, `_CAPTION_SUCCESS.json` |
+| [`ingest-caption-blip2-opt-2.7b-coco.ipynb`](ingestion/ingest-caption-blip2-opt-2.7b-coco.ipynb) | Dataset keyframe | BLIP-2 OPT 2.7B fine-tuned on COCO | `aqpahm/aic2026-caption-blip2-opt-2.7b-coco` | `captions.parquet`, `_CAPTION_SUCCESS.json` |
+| [`ingest-ocr-ppocrv6-medium.ipynb`](ingestion/ingest-ocr-ppocrv6-medium.ipynb) | Dataset keyframe | PP-OCRv6 medium detector + recognizer | `aqpahm/aic2026-ocr-ppocrv6-medium` (dự kiến) | `ocr.parquet`, `ocr_regions.parquet`, `_OCR_SUCCESS.json` |
+| [`ingest-ocr-hunyuanocr.ipynb`](ingestion/ingest-ocr-hunyuanocr.ipynb) | Dataset keyframe | HunyuanOCR-1.5 text spotting qua vLLM 0.18.1 | `aqpahm/aic2026-ocr-hunyuanocr` (dự kiến) | `ocr.parquet`, `ocr_regions.parquet`, `_OCR_SUCCESS.json` |
 
 ## Thứ tự phụ thuộc
 
@@ -30,7 +32,8 @@ flowchart TD
     O[2a. Object detection]
     S[2b. SigLIP 2 embedding]
     B[2c. BEiT-3 embedding]
-    C[2d. BLIP-2 captioning pilot]
+    C[2d. BLIP-2 captioning]
+    OCR[2e. OCR preflight/pilot<br/>HunyuanOCR-1.5 hoặc PP-OCRv6]
 
     V --> K
     V --> A
@@ -38,11 +41,12 @@ flowchart TD
     K --> S
     K --> B
     K --> C
+    K --> OCR
 ```
 
 - Keyframe phải hoàn tất trước OD, SigLIP 2 và BEiT-3.
 - ASR đọc video gốc nên có thể chạy độc lập hoặc song song với keyframe.
-- OD, SigLIP 2, BEiT-3 và BLIP-2 captioning không phụ thuộc lẫn nhau.
+- OD, SigLIP 2, BEiT-3, BLIP-2 captioning và OCR không phụ thuộc lẫn nhau.
 - Hai visual model phải ghi vào hai dataset riêng vì số chiều và không gian
   embedding khác nhau.
 
@@ -176,7 +180,61 @@ bình thường.
 - Caption có thể bỏ sót chữ nhỏ, tên riêng và thông tin chuyển động;
   không thay thế OCR hoặc ASR.
 - Artifact/marker: `captions.parquet`, `_CAPTION_SUCCESS.json`.
-- Dataset output ở trên là cấu hình dự kiến, chưa xác nhận đã ingest.
+- Dataset output đã được ingest hoàn tất.
+
+### OCR — PP-OCRv6 medium
+
+- `ocr.parquet` có một dòng cho mỗi keyframe; frame không có chữ vẫn có
+  `has_text=False`. `ocr_regions.parquet` có một dòng cho mỗi dòng/vùng chữ,
+  kèm bounding box `xyxy` chuẩn hóa `[0,1]` và thứ tự đọc.
+- Dùng detector `PP-OCRv6_medium_det` và recognizer
+  `PP-OCRv6_medium_rec`. Text tổng hợp giữ nguyên dấu và xuống dòng; bản chuẩn
+  hóa không dấu được lưu riêng để tìm kiếm.
+- Mặc định `PREFLIGHT_ONLY=True`: OCR đúng 5 keyframe, gồm các frame
+  `L26_V221:419`, `L30_V096:637` và `L30_V096:646` từng gây vòng lặp ở model
+  thử nghiệm trước, hiển thị kết quả và không upload. Sau khi duyệt 5 mẫu, đặt
+  `PREFLIGHT_ONLY=False` để chạy pilot 5 video. Sau đó pin input/model revision,
+  đặt `MAX_VIDEOS_PER_RUN=None`, khởi động lại runtime và chạy Run All.
+- Giữ `RUN_SMOKE_TEST_BEFORE_INGEST=True`: pilot/full luôn chạy lại 5 frame
+  smoke test trước khi mở hàng đợi video, nên lỗi model/inference hệ thống sẽ
+  dừng sớm trước khi tải hàng loạt archive.
+- Khi chạy lại, 5 video có marker và hash Parquet hợp lệ được bỏ qua.
+- Mỗi GPU giữ một pipeline OCR độc lập; Kaggle hai T4 xử lý hai video song song.
+  Detector giữ cạnh dài tối đa 1920. Recognizer gom tối đa 32 crop chữ trong
+  cùng frame; confidence dưới 0.45 bị lọc.
+- PP-OCRv6 không sinh văn bản tự do nên không có thinking, sampling, token limit
+  hoặc retry hallucination. Lỗi inference làm video thất bại và không ghi marker.
+- Checkpoint được ghi liên tục và `fsync` mỗi 25 frame. Uploader một thread commit
+  từng video song song với inference, backlog tối đa 2 video; mỗi GPU prefetch
+  thêm 1 video. Nếu kernel hoặc mạng lỗi, chạy lại tiếp tục từ checkpoint hợp lệ.
+- Circuit breaker ngừng cấp việc mới nếu cùng lỗi inference lặp 3 lần liên tiếp,
+  tránh tiếp tục tải hàng trăm video khi model hoặc generation bị lỗi hệ thống.
+- Chỉ resume/skip khi marker và cả hai artifact từ xa khớp model, input revision,
+  cấu hình inference, schema và SHA-256 của từng Parquet.
+- Hạn chế: từ điển của `PP-OCRv6_medium_rec` thiếu 44 chữ thường tiếng Việt
+  (dấu hỏi, dấu nặng, phần lớn tổ hợp mũ + dấu), nên không đọc đúng tiếng Việt có dấu.
+
+### OCR — HunyuanOCR-1.5
+
+- Cùng hai artifact và marker như notebook PP-OCRv6 nhưng ghi vào
+  `aqpahm/aic2026-ocr-hunyuanocr`. `ocr.parquet` lưu thêm `raw_output`,
+  `finish_reason`, `completion_tokens` và `ocr_status`
+  (`ok`/`no_text`/`truncated`/`repetition`/`parse_error`); không có confidence.
+- Cell đầu cài `vllm==0.18.1` (kéo torch 2.10, transformers 4.57). Lần đầu cài xong
+  cell dừng lại và yêu cầu **restart runtime**, sau đó chạy lại từ đầu. Không cài
+  transformers 5.x vào cùng môi trường: bản đó làm hỏng HunYuanVL trong vLLM 0.18.1.
+- Notebook không import torch. Mỗi GPU chạy một `vllm serve` trong tiến trình con;
+  log nằm ở `logs/vllm-gpu*-port*.log` và phần cuối log được in ra nếu server chết.
+- Mặc định `VLLM_DTYPE="float16"` cho mọi runtime vì T4 không có bfloat16. Nếu
+  preflight cho output rác hoặc rỗng trên frame rõ ràng có chữ, đổi sang `"float32"`.
+- Preflight OCR 5 frame (gồm ba frame từng gây lặp ở model thử nghiệm trước), in
+  output thô khi trạng thái bất thường, rồi đo tốc độ trên 96 frame và ước tính số
+  giờ cho mỗi 100k keyframe. Dataset keyframe hiện có 335.477 frame trên 873 video.
+- Frame trong một video được gửi song song tới mọi server; checkpoint chỉ ghi phần
+  tiền tố liên tục nên resume luôn đúng thứ tự. Input video kế tiếp được tải trước,
+  upload chạy trên thread riêng.
+- Circuit breaker dừng ngay khi server chết hoặc trả lỗi 4xx, và khi cùng lỗi lặp
+  3 lần liên tiếp.
 
 ## Điều kiện hoàn tất
 
