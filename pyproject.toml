@@ -8,10 +8,25 @@ version = "0.1.0"
 description = "Offline ingestion artifacts for an AIC multimedia video retrieval project"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
-dependencies = ["pandas>=2.2,<3", "pyarrow>=17,<22"]
+dependencies = ["huggingface-hub>=0.35,<2", "pandas>=2.2,<3", "pyarrow>=17,<22"]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.3,<9", "ruff>=0.6,<1"]
+retrieval = ["faiss-cpu>=1.9,<2", "numpy>=1.26,<3", "safetensors>=0.4,<1"]
+# Query-time text encoders; versions follow the ingest notebooks (SigLIP 2, BEiT-3).
+query = [
+    "torch>=2.4,<3",
+    "torchvision>=0.19,<1",
+    "transformers==4.57.1",
+    "sentencepiece>=0.2,<1",
+    "timm==0.9.16",
+]
+dev = [
+    "pytest>=8.3,<9",
+    "ruff>=0.6,<1",
+    "faiss-cpu>=1.9,<2",
+    "numpy>=1.26,<3",
+    "safetensors>=0.4,<1",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/multimedia_video_rag"]
