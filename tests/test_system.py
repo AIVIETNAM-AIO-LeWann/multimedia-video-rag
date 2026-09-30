@@ -182,9 +182,10 @@ class StubEncoder(BaseHTTPRequestHandler):
         self.reply(self.meta())
 
     def do_POST(self) -> None:
+        # Read the body before answering, or the client may see a connection reset.
+        texts = json.loads(self.rfile.read(int(self.headers["Content-Length"])))["texts"]
         if self.headers.get("X-API-Key") != self.key:
             return self.reply({"detail": "invalid X-API-Key"}, 401)
-        texts = json.loads(self.rfile.read(int(self.headers["Content-Length"])))["texts"]
         payload = self.meta()
         for module, entry in self.manifest["faiss"].items():
             vector = np.zeros(entry["dimension"])
